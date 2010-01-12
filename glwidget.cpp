@@ -5,6 +5,7 @@
 */
 
 #include "glwidget.h"
+#include <devil/include/il.h>
 
 #include <qapplication.h>
 #include <qtimer.h>
@@ -144,82 +145,56 @@ void GLWidget::setShaders(void)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	//vertexShader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
-	//fragmentShader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER);
-	//rayShaderV = glCreateShaderObjectARB(GL_VERTEX_SHADER);
-	//rayShaderF = glCreateShaderObjectARB(GL_FRAGMENT_SHADER);
-	//check_gl_error("create shaders");
+	arrowShaderV = glCreateShaderObjectARB(GL_VERTEX_SHADER);
+	arrowShaderF = glCreateShaderObjectARB(GL_FRAGMENT_SHADER);
+	check_gl_error("create shaders");
 
-	//GLcharARB* fragmentSource;
-	//GLcharARB* vertexSource;
-	//GLcharARB* raySourceV;
-	//GLcharARB* raySourceF;
+	GLcharARB* arrowSourceV;
+	GLcharARB* arrowSourceF;
 
-	//vertexSource = readShader("GLSL/slice.vert");
-	//fragmentSource = readShader("GLSL/slice.frag");
-	//raySourceV = readShader("GLSL/raycast.vert");
-	//raySourceF = readShader("GLSL/raycast.frag");
+	arrowSourceV = readShader("GLSL/arrow.vert");
+	arrowSourceF = readShader("GLSL/arrow.frag");
 
-	//glShaderSource(fragmentShader, 1, const_cast<const GLchar**>(&fragmentSource), 0);
-	//glShaderSource(vertexShader, 1, const_cast<const GLchar**>(&vertexSource), 0);
-	//glShaderSource(rayShaderV, 1, const_cast<const GLchar**>(&raySourceV), 0);
-	//glShaderSource(rayShaderF, 1, const_cast<const GLchar**>(&raySourceF), 0);
+	glShaderSource(arrowShaderV, 1, const_cast<const GLchar**>(&arrowSourceV), 0);
+	glShaderSource(arrowShaderF, 1, const_cast<const GLchar**>(&arrowSourceF), 0);
 
-	//glCompileShader(vertexShader);
-	//glCompileShader(fragmentShader);
-	//glCompileShader(rayShaderV);
-	//glCompileShader(rayShaderF);
-	//check_gl_error("compile shaders");
+	glCompileShader(arrowShaderV);
+	glCompileShader(arrowShaderF);
+	check_gl_error("compile shaders");
 
-	//transferProgram = glCreateProgram();
-	//check_gl_error("create program");
-	//glAttachShader(transferProgram, vertexShader);
-	//glAttachShader(transferProgram, fragmentShader);
-	//check_gl_error("attach shaders");
-	//glLinkProgram(transferProgram);
-	//check_gl_error("link program");
+	arrowProgram = glCreateProgram();
+	check_gl_error("create program");
+	glAttachShader(arrowProgram, arrowShaderV);
+	glAttachShader(arrowProgram, arrowShaderF);
+	check_gl_error("attach shaders");
+	glLinkProgram(arrowProgram);
+	check_gl_error("link program");
 
-	//rayProgram = glCreateProgram();
-	//check_gl_error("create program");
-	//glAttachShader(rayProgram, rayShaderV);
-	//glAttachShader(rayProgram, rayShaderF);
-	//check_gl_error("attach shaders");
-	//glLinkProgram(rayProgram);
-	//check_gl_error("link program");
+	GLint compiledv, compiledf, linked;
 
-	//GLint compiledv, compiledf, linked;
+	glGetShaderiv(arrowShaderV, GL_COMPILE_STATUS, &compiledv);
+	glGetShaderiv(arrowShaderF, GL_COMPILE_STATUS, &compiledf);
 
-	//glGetShaderiv(rayShaderV, GL_COMPILE_STATUS, &compiledv);
-	//glGetShaderiv(rayShaderF, GL_COMPILE_STATUS, &compiledf);
+	glGetProgramiv(arrowProgram, GL_LINK_STATUS, &linked);
 
-	//glGetProgramiv(rayProgram, GL_LINK_STATUS, &linked);
+	if (!compiledv)
+		qDebug() << "vertex shader not compiled";
+	if (!compiledf)
+		qDebug() << "fragment shader not compiled";
 
-	//if (!compiledv)
-	//	qDebug() << "vertex shader not compiled";
-	//if (!compiledf)
-	//	qDebug() << "ray shader not compiled";
+	if (!linked)
+		qDebug() << "not linked ";
 
-	//if (!linked)
-	//	qDebug() << "not linked ";
+	GLchar log[40960];
+	GLint len;
 
-	//GLchar log[40960];
-	//GLint len;
-	//glGetShaderInfoLog(vertexShader, 40960, &len, log); 
-	//std::cout << log << std::endl;
+	glGetShaderInfoLog(arrowShaderV, 40960, &len, log); 
+	std::cout << log << std::endl;
+	qDebug() << log;
 
-	//glGetShaderInfoLog(fragmentShader, 40960, &len, log); 
-	//std::cout << log << std::endl;
-
-	//glGetShaderInfoLog(rayShaderV, 40960, &len, log); 
-	//std::cout << log << std::endl;
-	//qDebug() << log;
-
-	//glGetShaderInfoLog(rayShaderF, 40960, &len, log); 
-	//std::cout << log << std::endl;
-	//qDebug() << log;
-
-	//glUseProgram(transferProgram);
-	//check_gl_error("use program");
+	glGetShaderInfoLog(arrowShaderF, 40960, &len, log); 
+	std::cout << log << std::endl;
+	qDebug() << log;
 
 	tf->generate();
 }
@@ -266,10 +241,32 @@ void GLWidget::initializeGL()
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0f);
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
+	glEnable(GL_TEXTURE_2D);
+
+	glDepthFunc(GL_LEQUAL);
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+	ilInit();
+	
+	ILuint spriteImage;
+	ilGenImages(1, &spriteImage);
+	ilBindImage(spriteImage);
+	ilLoadImage("textures/arrow.gif");
+	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+	
+	glGenTextures(1, &sprite);
+	glBindTexture(GL_TEXTURE_2D, sprite);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData());
+	check_gl_error("generate arrow sprite");
+	ilDeleteImages(1, &spriteImage);
+
 	setShaders();
 }
 
@@ -290,12 +287,45 @@ void GLWidget::resizeGL(int width, int height)
 
 void GLWidget::paintGL()
 {
+	glUseProgram(0);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glViewport(0, 0, float(width()), float(height()));
-	gluPerspective(40.0, float(height())/float(width()), 0.01, 50.0);
+	glOrtho(0.0f,width(),height(),0.0f,-1.0f,1.0f);				
 	glMatrixMode(GL_MODELVIEW);
 	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+	glPushMatrix();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBegin(GL_QUADS);
+		glColor3f(1, 1, 1);
+		glVertex3f(0, 0, -0.99);
+		glVertex3f(width(), 0, -0.99);
+		glVertex3f(width(), height(), -0.99);
+		glVertex3f(0, height(), -0.99);
+	glEnd();
+
+	glUseProgram(arrowProgram);
+	glUniform1i(glGetUniformLocation(arrowProgram, "arrow"), 0);
+	glUniform1i(glGetUniformLocation(arrowProgram, "tf"), 1);
+
+	glEnable(GL_POINT_SPRITE);
+	glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+	glPointSize(min(width(), height())/40);
+	glBindTexture(GL_TEXTURE_2D, sprite);
+	glEnable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+	glBegin(GL_POINTS);
+		for(int i = 1; i < 20; i++)
+		{
+			for(int j = 1; j < 20; j++)
+			{
+				glVertex3f(i/20.0 * width(), j/20.0 * height(), 0);
+			}
+		}
+	glEnd();
+	glDisable(GL_BLEND);
+	glPopMatrix();
 }
 
 void GLWidget::timeOut()

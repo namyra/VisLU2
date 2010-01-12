@@ -136,6 +136,18 @@ private:
 	//! The transfer texture used by this widget.
 	TFTexture *tf;
 
+	//! The OpenGL id for the vertex shader for the arrow plot.
+	GLuint arrowShaderV;
+
+	//! The OpenGL id for the fragment shader for the arrow plot.
+	GLuint arrowShaderF;
+
+	//! The OpenGL id for the arrow plot shader program.
+	GLuint arrowProgram;
+
+	//! The OpenGL id for the arrow sprite texture.
+	GLuint sprite;
+
 	//! Utility function to get the next higher power of two for any given integer.
 	/*!
 		Used to generate an appropriately sized texture for an arbitrarily large volume dataset if non-power-of-two textures are not supported.

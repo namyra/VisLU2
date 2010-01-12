@@ -14,12 +14,8 @@ TFTexture::TFTexture(QWidget *parent)
 
 	nodes = std::map<int, TFNode>();
 
-	addNode(TFNode(0, 0.0, 0.0, 0.0, 0.0));
-	addNode(TFNode(96 * 8.0, 0.5, 0.1, 0.0, 0.05));
-	addNode(TFNode(128 * 8.0, 0.9, 0.05, 0.1, 0.1));
-	addNode(TFNode(164 * 8.0, 0.75, 0.8, 0.5, 0.36));
-	addNode(TFNode(196 * 8.0, 0.95, 0.89, 0.65, 0.76));
-	addNode(TFNode(256 * 8.0, 0.99, 0.99, 0.96, 0.97));
+	addNode(TFNode(0, 0.0, 0.0, 0.7, 0.0));
+	addNode(TFNode(256 * 8.0, 0.8, 0, 0, 1));
 }
 
 TFTexture::~TFTexture(void)
@@ -74,16 +70,8 @@ void TFTexture::generate(void)
 {
 	glPushMatrix();
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_3D, 0);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glUseProgram(0);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_TEXTURE_3D);
 
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 	 
