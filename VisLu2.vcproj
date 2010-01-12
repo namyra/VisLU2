@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="VisLu2"
 	ProjectGUID="{DB3B3813-B79E-4D53-89B3-3247E84F2B85}"
 	RootNamespace="VisLu1"
@@ -169,6 +169,14 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\GLSL\color.frag"
+				>
+			</File>
+			<File
+				RelativePath=".\GLSL\color.vert"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\readme.txt"

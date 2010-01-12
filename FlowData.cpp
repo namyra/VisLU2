@@ -2,6 +2,9 @@
 #include <math.h>
 #include "reverseBytes.h"
 
+#include <qgl.h>
+#include <QDebug>
+
 FlowData::FlowData()
 {
     //mark all the channel slots as free
@@ -37,13 +40,16 @@ bool FlowData::loadDataset(string filename, bool bigEndian)
 	/////////////
 	string griName = filename+".gri";
 
+	qDebug() << "- Loading grid file '" << griName.c_str();
 	std::cout << "- Loading grid file '" << griName << "' ... " << std::endl;
+	
     //open the grid file
 	griFile = fopen(griName.c_str(),"rb");
 
 	if (!griFile)
 	{
 		std::cerr << "+ Error loading grid file:" << griName << std::endl << std::endl;
+		qDebug() << "+ Error loading grid file:" << griName.c_str();
 		return false;
 	}
 	//save the header
@@ -58,7 +64,10 @@ bool FlowData::loadDataset(string filename, bool bigEndian)
 	float DT;	 
 	//read some neceassry data from the header
 	sscanf(header,"SN4DB %d %d %d %d %d %f",&dimX,&dimY,&dimZ,&numChannels,&timesteps,&DT);
-	printf("Channels: %d\nTimesteps: %d\n",numChannels,timesteps);	 
+	printf("Channels: %d\nTimesteps: %d\n",numChannels,timesteps);
+
+	qDebug() << "Channels: " << numChannels;
+	qDebug() << "Timesteps: " << timesteps;
 
 	/////////////
 	// DAT FILE
@@ -67,12 +76,14 @@ bool FlowData::loadDataset(string filename, bool bigEndian)
 	char suffix[16];
 	sprintf(suffix,".%.5u.dat",0); //the second dot and the following 5 specify that a minimum of 5 numbers will be written
 	string datName = filename.append(suffix);
-	std::cout << "- Loading grid file '" << datName << "' ... " << std::endl;    
+	std::cout << "- Loading grid file '" << datName << "' ... " << std::endl;
+	qDebug() << "- Loading grid file '" << datName.c_str();
 	//open the dat file
 	datFile = fopen(datName.c_str(),"rb");
 	if (!datFile)
 	{
 		std::cerr << "+ Error loading dat file:" << datName << std::endl << std::endl;
+		qDebug() << "+ Error loading dat file:" << datName.c_str();
 		return false;
 	}
 	//let's prepare the channels
@@ -87,6 +98,7 @@ bool FlowData::loadDataset(string filename, bool bigEndian)
 	if (result != numChannels*geometry.getDimX()*geometry.getDimY())
 	{
 		std::cerr << "+ Error reading dat file:" << datName << std::endl << std::endl;
+		qDebug() << "+ Error reading dat file:" << datName.c_str();
 		return false;
 	}
 	//close the file, it is no longer needed
@@ -104,6 +116,13 @@ bool FlowData::loadDataset(string filename, bool bigEndian)
 		//copy the values of the jth channel from tmpArray, which carries numChannels    
 		channels[ch[j]]->copyValues(tmpArray,(numChannels),j);
 	}
+
+	int vel = createChannelVectorLength(0,1,2);
+
+	qDebug() << "TEST: " << getChannel(vel)->getValueNormPos(vec3(0.5,0.5));
+	qDebug() << "TEST2: " << getChannel(3)->getValueNormPos(vec3(0.5,0.5));
+	qDebug() << "TEST3: " << getChannel(4)->getValueNormPos(vec3(0.5,0.5));
+
 	delete[] ch;
 	delete[] tmpArray;
 	return true;
@@ -118,6 +137,7 @@ int FlowData::createChannel()
 	if (i < max_channels) 
     {
         std::cout << "Creating channel at " << i << " ... ";
+		qDebug() << "Creating channel at " << i;
         //create a new channel
         channels[i] = new FlowChannel(&geometry);
         //remember the slot
@@ -187,4 +207,8 @@ int FlowData::createChannelVectorLength(int chX, int chY, int chZ)
 int FlowData::getNumTimesteps()
 {
 	return timesteps;
+}
+
+FlowGeometry* FlowData::getGeometry() {
+	return &geometry;
 }

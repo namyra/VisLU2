@@ -9,6 +9,8 @@
 #include <qapplication.h>
 #include <qtimer.h>
 
+#include <QDebug>
+
 GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
 {
     if(timerInterval == 0)
@@ -20,15 +22,17 @@ GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
         timer->start(timerInterval);
     }
 
-	dataset = new FlowData();
-	dataset->loadDataset("dat\\c_block", false);
-	chX = dataset->createChannelGeometry(0);
-	chY = dataset->createChannelGeometry(1);
-	vel = dataset->createChannelVectorLength(0,1,2);
-
 	tf = new TFTexture(this);
 
 	updateGL();
+
+	dataset = new FlowData();
+	//dataset->loadDataset("dat\\c_block", false);
+	loadDataSet("dat\\c_block");
+/*	chX = dataset->createChannelGeometry(0);
+	chY = dataset->createChannelGeometry(1);
+	vel = dataset->createChannelVectorLength(0,1,2);
+*/
 }
 
 GLWidget::~GLWidget() {
@@ -138,46 +142,47 @@ void GLWidget::setShaders(void)
 
 	tf->setFBO(fbo_transfer, transferTexture);
 
+
 	glViewport(0, 0, width(), height());
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	//vertexShader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
-	//fragmentShader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER);
+	vertexShader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+	fragmentShader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER);
 	//rayShaderV = glCreateShaderObjectARB(GL_VERTEX_SHADER);
 	//rayShaderF = glCreateShaderObjectARB(GL_FRAGMENT_SHADER);
-	//check_gl_error("create shaders");
+	check_gl_error("create shaders");
 
-	//GLcharARB* fragmentSource;
-	//GLcharARB* vertexSource;
+	GLcharARB* fragmentSource;
+	GLcharARB* vertexSource;
 	//GLcharARB* raySourceV;
 	//GLcharARB* raySourceF;
 
-	//vertexSource = readShader("GLSL/slice.vert");
-	//fragmentSource = readShader("GLSL/slice.frag");
+	vertexSource = readShader("GLSL/color.vert");
+	fragmentSource = readShader("GLSL/color.frag");
 	//raySourceV = readShader("GLSL/raycast.vert");
 	//raySourceF = readShader("GLSL/raycast.frag");
 
-	//glShaderSource(fragmentShader, 1, const_cast<const GLchar**>(&fragmentSource), 0);
-	//glShaderSource(vertexShader, 1, const_cast<const GLchar**>(&vertexSource), 0);
+	glShaderSource(fragmentShader, 1, const_cast<const GLchar**>(&fragmentSource), 0);
+	glShaderSource(vertexShader, 1, const_cast<const GLchar**>(&vertexSource), 0);
 	//glShaderSource(rayShaderV, 1, const_cast<const GLchar**>(&raySourceV), 0);
 	//glShaderSource(rayShaderF, 1, const_cast<const GLchar**>(&raySourceF), 0);
 
-	//glCompileShader(vertexShader);
-	//glCompileShader(fragmentShader);
+	glCompileShader(vertexShader);
+	glCompileShader(fragmentShader);
 	//glCompileShader(rayShaderV);
 	//glCompileShader(rayShaderF);
-	//check_gl_error("compile shaders");
+	check_gl_error("compile shaders");
 
-	//transferProgram = glCreateProgram();
+	gridProgram = glCreateProgram();
 	//check_gl_error("create program");
-	//glAttachShader(transferProgram, vertexShader);
-	//glAttachShader(transferProgram, fragmentShader);
+	glAttachShader(gridProgram, vertexShader);
+	glAttachShader(gridProgram, fragmentShader);
 	//check_gl_error("attach shaders");
-	//glLinkProgram(transferProgram);
-	//check_gl_error("link program");
+	glLinkProgram(gridProgram);
+	check_gl_error("link program");
 
 	//rayProgram = glCreateProgram();
 	//check_gl_error("create program");
@@ -187,28 +192,30 @@ void GLWidget::setShaders(void)
 	//glLinkProgram(rayProgram);
 	//check_gl_error("link program");
 
-	//GLint compiledv, compiledf, linked;
+	GLint compiledv, compiledf, linked;
 
-	//glGetShaderiv(rayShaderV, GL_COMPILE_STATUS, &compiledv);
-	//glGetShaderiv(rayShaderF, GL_COMPILE_STATUS, &compiledf);
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &compiledv);
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &compiledf);
 
-	//glGetProgramiv(rayProgram, GL_LINK_STATUS, &linked);
+	glGetProgramiv(gridProgram, GL_LINK_STATUS, &linked);
 
-	//if (!compiledv)
-	//	qDebug() << "vertex shader not compiled";
-	//if (!compiledf)
-	//	qDebug() << "ray shader not compiled";
+	if (!compiledv)
+		qDebug() << "vertex shader not compiled";
+	if (!compiledf)
+		qDebug() << "fragment shader not compiled";
 
-	//if (!linked)
-	//	qDebug() << "not linked ";
+	if (!linked)
+		qDebug() << "not linked ";
 
-	//GLchar log[40960];
-	//GLint len;
-	//glGetShaderInfoLog(vertexShader, 40960, &len, log); 
-	//std::cout << log << std::endl;
+	GLchar log[40960];
+	GLint len;
+	glGetShaderInfoLog(vertexShader, 40960, &len, log); 
+	qDebug() << log;
+	std::cout << log << std::endl;
 
-	//glGetShaderInfoLog(fragmentShader, 40960, &len, log); 
-	//std::cout << log << std::endl;
+	glGetShaderInfoLog(fragmentShader, 40960, &len, log); 
+	qDebug() << log;
+	std::cout << log << std::endl;
 
 	//glGetShaderInfoLog(rayShaderV, 40960, &len, log); 
 	//std::cout << log << std::endl;
@@ -218,8 +225,8 @@ void GLWidget::setShaders(void)
 	//std::cout << log << std::endl;
 	//qDebug() << log;
 
-	//glUseProgram(transferProgram);
-	//check_gl_error("use program");
+	glUseProgram(gridProgram);
+	check_gl_error("use program");
 
 	tf->generate();
 }
@@ -296,6 +303,66 @@ void GLWidget::paintGL()
 	gluPerspective(40.0, float(height())/float(width()), 0.01, 50.0);
 	glMatrixMode(GL_MODELVIEW);
 	glEnable(GL_DEPTH_TEST);
+
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	//glPushMatrix();
+
+	glMatrixMode (GL_MODELVIEW);
+	//glPushMatrix ();
+	glLoadIdentity ();
+	glMatrixMode (GL_PROJECTION);
+	//glPushMatrix ();
+	glLoadIdentity ();
+	//check_gl_error("test");
+	
+	glColor3f(1, 1, 1);
+
+	glUseProgram(gridProgram);
+
+	glEnable(GL_TEXTURE_RECTANGLE_ARB);
+	glEnable(GL_TEXTURE_2D);
+	
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gridTexture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, channel3Texture);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, transferTexture);
+
+	glUniform1iARB(glGetUniformLocation(gridProgram, "tex_grid"), 0);
+	glUniform1iARB(glGetUniformLocation(gridProgram, "tex_channel3"), 1);
+	glUniform1iARB(glGetUniformLocation(gridProgram, "tex_transfer"), 2);
+
+	glTranslatef(-0.5, 0.5, 0);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-0.5,-0.5,-1);
+	glTexCoord2f(314, 0.0f);
+	glVertex3f(0.5,-0.5,-1);
+	glTexCoord2f(314, 538);
+	glVertex3f(0.5,0.5,-1);
+	glTexCoord2f(0.0f, 538);
+	glVertex3f(-0.5,0.5,-1);
+	glEnd();
+/*
+	glTranslatef(0.75, 0, 0);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-0.5,-0.5,-1);
+	glTexCoord2f(1, 0.0f);
+	glVertex3f(0.5,-0.5,-1);
+	glTexCoord2f(1, 1);
+	glVertex3f(0.5,0.5,-1);
+	glTexCoord2f(0.0f, 1);
+	glVertex3f(-0.5,0.5,-1);
+	glEnd();*/
+
+	glUseProgram(0);
+
+	//glPopMatrix();
+	//glPopMatrix();
+
 }
 
 void GLWidget::timeOut()
@@ -321,5 +388,53 @@ const int GLWidget::GetNextPowerOfTwo(const int iNumber)
 void GLWidget::loadDataSet(std::string fileName)
 {
 	dataset->loadDataset(fileName, false);
+	chX = dataset->createChannelGeometry(0);
+	chY = dataset->createChannelGeometry(1);
+	vel = dataset->createChannelVectorLength(0,1,2);
+
+	geometry = dataset->getGeometry();
+
+	//check_gl_error("test");
+	glEnable(GL_TEXTURE_RECTANGLE_ARB);
+	glGenTextures(1, &gridTexture);
+	check_gl_error("generate grid texture");
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gridTexture);
+	check_gl_error("bind grid texture");
+
+	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, geometry->getDimX(), geometry->getDimY(), 0, GL_RGB, GL_FLOAT, geometry->geometryData);
+	check_gl_error("teximage2d grid texture");
+
+	qDebug() << "dimX: " << geometry->getDimX();
+	qDebug() << "dimY: " << geometry->getDimY();
+
+/*	float* test = (float*) malloc(sizeof(float) * geometry->getDimX() * geometry->getDimY() * 3);
+	glGetTexImage(GL_TEXTURE_RECTANGLE_ARB, 0 , GL_RGB, GL_FLOAT, test);
+
+	qDebug() << "testing[0]: " << test[0];
+	qDebug() << "testing[0]: " << test[1];
+	qDebug() << "testing[0]: " << test[2];
+	qDebug() << "testing[313]: " << test[313*3];
+	qDebug() << "testing[313]: " << test[313*3+1];
+	qDebug() << "testing[313]: " << test[313*3+2];
+*/
+
+	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	check_gl_error("grid tex parameters filter");
+
+	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	check_gl_error("grid tex parameters wrapping");
+
+	channel3 = dataset->getChannel(3);
+
+	glGenTextures(1, &channel3Texture);
+	check_gl_error("generate data texture");
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, channel3Texture);
+	check_gl_error("bind data texture");
+
+	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_LUMINANCE, 11, 18, 0, GL_LUMINANCE, GL_FLOAT, channel3);
+	check_gl_error("teximage2d data texture");
+
 }
 
