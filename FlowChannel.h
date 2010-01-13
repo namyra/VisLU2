@@ -49,5 +49,7 @@ class FlowChannel{
 		float getMax();
 		///returns the range = max - min
 		float getRange();
+
+		float getRawValue(int i);
 };
 #endif

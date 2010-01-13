@@ -519,5 +519,47 @@ void GLWidget::loadDataSet(std::string fileName)
 	//glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, geometry->getDimX(), geometry->getDimY(), 0, GL_RGB, GL_FLOAT, channel3);
 	check_gl_error("teximage2d data texture");
 
+	//glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
+
+	FlowChannel* v1 = dataset->getChannel(0);
+	FlowChannel* v2 = dataset->getChannel(1);
+	FlowChannel* v3 = dataset->getChannel(2);
+
+	qDebug() << "testing[0]: " << v1->getRawValue(0);
+	qDebug() << "testing[0]: " << v2->getRawValue(0);
+	qDebug() << "testing[0]: " << v3->getRawValue(0);
+	qDebug() << "testing[313]: " << v1->getRawValue(313);
+	qDebug() << "testing[313]: " << v2->getRawValue(313);
+	qDebug() << "testing[313]: " << v3->getRawValue(313);
+	qDebug() << "testing[555]: " << v1->getRawValue(555);
+	qDebug() << "testing[555]: " << v2->getRawValue(555);
+	qDebug() << "testing[555]: " << v3->getRawValue(555);
+
+	float* velocity = (float*) malloc(sizeof(float) * geometry->getDimX() * geometry->getDimY() * 3);
+	for (int i = 0; i < geometry->getDimX()*geometry->getDimY(); i++) {
+		velocity[i*3] = v1->getRawValue(i);
+		velocity[i*3+1] = v2->getRawValue(i);
+		velocity[i*3+2] = v3->getRawValue(i);
+	}
+
+	glGenTextures(1, &velocityTexture);
+	check_gl_error("generate velocity texture");
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, velocityTexture);
+	check_gl_error("bind velocity texture");
+	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, geometry->getDimX(), geometry->getDimY(), 0, GL_RGB, GL_FLOAT, velocity);
+
+	float* test = (float*) malloc(sizeof(float) * geometry->getDimX() * geometry->getDimY() * 3);
+	glGetTexImage(GL_TEXTURE_RECTANGLE_ARB, 0 , GL_RGB, GL_FLOAT, test);
+
+	qDebug() << "testing[0]: " << test[0];
+	qDebug() << "testing[0]: " << test[1];
+	qDebug() << "testing[0]: " << test[2];
+	qDebug() << "testing[313]: " << test[313*3];
+	qDebug() << "testing[313]: " << test[313*3+1];
+	qDebug() << "testing[313]: " << test[313*3+2];
+	qDebug() << "testing[555]: " << test[555*3];
+	qDebug() << "testing[555]: " << test[555*3+1];
+	qDebug() << "testing[555]: " << test[555*3+2];
+
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
 }

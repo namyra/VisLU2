@@ -127,6 +127,7 @@ private:
 	FlowGeometry* geometry;
 	FlowChannel* channel3;
 	GLuint channel3Texture;
+	GLuint velocityTexture;
 
 	GLuint vertexShader;
 	GLuint fragmentShader;
