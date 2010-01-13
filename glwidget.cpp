@@ -23,6 +23,9 @@ GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
         timer->start(timerInterval);
     }
 
+	arrowPlot = true;
+	streamlines = false;
+
 	tf = new TFTexture(this);
 
 	updateGL();
@@ -71,6 +74,16 @@ void GLWidget::check_gl_error (std::string from) {
 TFTexture* GLWidget::transferFunction()
 {
 	return tf;
+}
+
+void GLWidget::toggleArrowPlot(bool enabled)
+{
+	arrowPlot = enabled;
+}
+
+void GLWidget::toggleStreamlines(bool enabled)
+{
+	streamlines = enabled;
 }
 
 char* GLWidget::readShader(char *fn) {
@@ -418,6 +431,16 @@ void GLWidget::paintGL()
 		glVertex3f(0,height(),-0.8);
 	glEnd();
 
+	if(arrowPlot)
+		drawArrows();
+
+	//glPopMatrix();
+	//glPopMatrix();
+
+}
+
+void GLWidget::drawArrows()
+{
 	glUseProgram(arrowProgram);
 
 	glActiveTexture(GL_TEXTURE0);
@@ -439,10 +462,6 @@ void GLWidget::paintGL()
 			}
 		}
 	glEnd();
-
-	//glPopMatrix();
-	//glPopMatrix();
-
 }
 
 void GLWidget::timeOut()
