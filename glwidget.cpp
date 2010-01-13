@@ -23,6 +23,9 @@ GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
         timer->start(timerInterval);
     }
 
+	arrowPlot = true;
+	streamlines = false;
+
 	tf = new TFTexture(this);
 
 	updateGL();
@@ -71,6 +74,16 @@ void GLWidget::check_gl_error (std::string from) {
 TFTexture* GLWidget::transferFunction()
 {
 	return tf;
+}
+
+void GLWidget::toggleArrowPlot(bool enabled)
+{
+	arrowPlot = enabled;
+}
+
+void GLWidget::toggleStreamlines(bool enabled)
+{
+	streamlines = enabled;
 }
 
 char* GLWidget::readShader(char *fn) {
@@ -421,35 +434,43 @@ void GLWidget::paintGL()
 			glVertex3f(0,height(),-0.8);
 		glEnd();
 
-		glUseProgram(arrowProgram);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, velocityTexture);
-		glUniform1i(glGetUniformLocation(arrowProgram, "velocity"), 1);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, sprite);
-		glUniform1i(glGetUniformLocation(arrowProgram, "arrow"), 0);
-
-		glEnable(GL_POINT_SPRITE);
-		glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-		glPointSize(min(width(), height())/40);
-		glEnable(GL_BLEND);
-		glDisable(GL_DEPTH_TEST);
-		glBegin(GL_POINTS);
-			for(int i = 1; i < 20; i++)
-			{
-				for(int j = 1; j < 20; j++)
-				{
-					glVertex3f(i/20.0 * width(), j/20.0 * height(), 0);
-				}
-			}
-		glEnd();
-
-		//glPopMatrix();
-		//glPopMatrix();
+		if(arrowPlot)
+			drawArrows();
 	}
 	init = true;
+	//glPopMatrix();
+	//glPopMatrix();
+
+}
+
+void GLWidget::drawArrows()
+{
+	glUseProgram(arrowProgram);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, velocityTexture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, sprite);
+
+	glUniform1i(glGetUniformLocation(arrowProgram, "arrow"), 0);
+	glUniform1i(glGetUniformLocation(arrowProgram, "velocity"), 1);
+
+	glEnable(GL_POINT_SPRITE);
+	glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+	glPointSize(min(width(), height())/40);
+	glEnable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+	glBegin(GL_POINTS);
+	for(int i = 1; i < 20; i++)
+	{
+		for(int j = 1; j < 20; j++)
+		{
+			glVertex3f(i/20.0 * width(), j/20.0 * height(), 0);
+		}
+	}
+	glEnd();
+		//glPopMatrix();
+		//glPopMatrix();
 }
 
 void GLWidget::timeOut()

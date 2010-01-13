@@ -68,6 +68,10 @@ public:
 	*/
 	TFTexture* transferFunction();
 
+public slots:
+	void toggleArrowPlot(bool enabled);
+	void toggleStreamlines(bool enabled);
+
 protected:
 
 	//! Initialises OpenGL.
@@ -115,6 +119,10 @@ private:
 	//! The timer taking care of continual updates to this widget.
     QTimer *timer;
 
+	bool arrowPlot;
+	
+	bool streamlines;
+
 	//! The flow data.
 	FlowData *dataset;
 
@@ -160,6 +168,8 @@ private:
 	GLuint fbo_grid;
 	GLuint gridTexture;
 	GLuint depth_rb_grid;
+
+	void drawArrows();
 
 	//! Utility function to get the next higher power of two for any given integer.
 	/*!
