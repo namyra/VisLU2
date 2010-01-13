@@ -297,30 +297,31 @@ void GLWidget::resizeGL(int width, int height)
 
 void GLWidget::paintGL()
 {
-	glMatrixMode(GL_PROJECTION);
+	/*glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glViewport(0, 0, float(width()), float(height()));
 	gluPerspective(40.0, float(height())/float(width()), 0.01, 50.0);
 	glMatrixMode(GL_MODELVIEW);
-	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);*/
 
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	//glPushMatrix();
 
-	glMatrixMode (GL_MODELVIEW);
-	//glPushMatrix ();
-	glLoadIdentity ();
-	glMatrixMode (GL_PROJECTION);
-	//glPushMatrix ();
-	glLoadIdentity ();
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(0,width(),height(),0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 	//check_gl_error("test");
 	
 	glColor3f(1, 1, 1);
 
 	glUseProgram(gridProgram);
+	//glUseProgram(0);
 
 	glEnable(GL_TEXTURE_RECTANGLE_ARB);
+	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 	
 	glActiveTexture(GL_TEXTURE0);
@@ -334,18 +335,25 @@ void GLWidget::paintGL()
 	glUniform1iARB(glGetUniformLocation(gridProgram, "tex_channel3"), 1);
 	glUniform1iARB(glGetUniformLocation(gridProgram, "tex_transfer"), 2);
 
-	glTranslatef(-0.5, 0.5, 0);
+	//glBindTexture(GL_TEXTURE_2D, transferTexture);
+	/*glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gridTexture);
+	glDisable(GL_TEXTURE_RECTANGLE_ARB);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_CULL_FACE);*/
+
+	//glTranslatef(-0.5, 0.5, 0);
+	//glTranslatef(-0.5, 0, 0);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(-0.5,-0.5,-1);
-	glTexCoord2f(314, 0.0f);
-	glVertex3f(0.5,-0.5,-1);
-	glTexCoord2f(314, 538);
-	glVertex3f(0.5,0.5,-1);
-	glTexCoord2f(0.0f, 538);
-	glVertex3f(-0.5,0.5,-1);
+	glVertex2f(0,0);
+	glTexCoord2f(1, 0.0f);
+	glVertex2f(width(),0);
+	glTexCoord2f(1, 1);
+	glVertex2f(width(),height());
+	glTexCoord2f(0.0f, 1);
+	glVertex2f(0,height());
 	glEnd();
-/*
+
 	glTranslatef(0.75, 0, 0);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0f, 0.0f);
@@ -356,7 +364,7 @@ void GLWidget::paintGL()
 	glVertex3f(0.5,0.5,-1);
 	glTexCoord2f(0.0f, 1);
 	glVertex3f(-0.5,0.5,-1);
-	glEnd();*/
+	glEnd();
 
 	glUseProgram(0);
 
@@ -427,13 +435,17 @@ void GLWidget::loadDataSet(std::string fileName)
 	check_gl_error("grid tex parameters wrapping");
 
 	channel3 = dataset->getChannel(3);
+	float channel3Min = channel3->getMin();
+	float channel3Max = channel3->getMax();
+	float channel3Ranger = channel3->getRange();
 
 	glGenTextures(1, &channel3Texture);
 	check_gl_error("generate data texture");
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, channel3Texture);
 	check_gl_error("bind data texture");
 
-	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_LUMINANCE, 11, 18, 0, GL_LUMINANCE, GL_FLOAT, channel3);
+	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_LUMINANCE, 11, 109, 0, GL_LUMINANCE, GL_FLOAT, channel3);
+	//glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, geometry->getDimX(), geometry->getDimY(), 0, GL_RGB, GL_FLOAT, channel3);
 	check_gl_error("teximage2d data texture");
 
 }

@@ -119,6 +119,7 @@ bool FlowData::loadDataset(string filename, bool bigEndian)
 
 	int vel = createChannelVectorLength(0,1,2);
 
+	qDebug() << "vel: " << vel;
 	qDebug() << "TEST: " << getChannel(vel)->getValueNormPos(vec3(0.5,0.5));
 	qDebug() << "TEST2: " << getChannel(3)->getValueNormPos(vec3(0.5,0.5));
 	qDebug() << "TEST3: " << getChannel(4)->getValueNormPos(vec3(0.5,0.5));
