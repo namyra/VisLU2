@@ -99,3 +99,8 @@ float FlowChannel::getRange()
 {
     return maximum - minimum;
 }
+
+float FlowChannel::getRawValue(int i)
+{
+	return values[i];
+}
