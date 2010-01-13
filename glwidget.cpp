@@ -423,14 +423,13 @@ void GLWidget::paintGL()
 
 		glUseProgram(arrowProgram);
 
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, velocityTexture);
+		glUniform1i(glGetUniformLocation(arrowProgram, "velocity"), 1);
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, sprite);
-
 		glUniform1i(glGetUniformLocation(arrowProgram, "arrow"), 0);
-
-		//glActiveTexture(GL_TEXTURE1);
-		//glBindTexture(GL_TEXTURE_RECTANGLE_ARB, velocityTexture);
-		//glUniform1i(glGetUniformLocation(arrowProgram, "velocity_tex"), 1);
 
 		glEnable(GL_POINT_SPRITE);
 		glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
