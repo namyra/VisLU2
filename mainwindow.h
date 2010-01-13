@@ -40,6 +40,9 @@ private:
 	//! The widget displaying the actual render of the volume data.
     GLWidget *glWidget;
 
+	QCheckBox *checkArrowPlot;
+	QCheckBox *checkStreamlines;
+
 	//! The Qt scene used to display the transfer function.
 	QGraphicsScene *transferScene;
 

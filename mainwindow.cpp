@@ -15,6 +15,11 @@ MainWindow::MainWindow()
 
     glWidget = new GLWidget(50, widget);
 
+	checkArrowPlot = new QCheckBox("Arrow Plot", widget);
+	checkArrowPlot->setChecked(true);
+
+	connect(checkArrowPlot, SIGNAL(toggled(bool)), glWidget, SLOT(toggleArrowPlot(bool)));
+
 	transferScene = new QGraphicsScene;
 	transferView = new TFView(transferScene, glWidget->transferFunction());
 	transferView->show();
@@ -25,6 +30,7 @@ MainWindow::MainWindow()
 
 	sideBar = new QGroupBox;
     QVBoxLayout *sideBarLayout = new QVBoxLayout;
+	sideBarLayout->addWidget(checkArrowPlot);
 	sideBarLayout->addWidget(transferView);
 	sideBarLayout->addWidget(clearButton);
     sideBarLayout->insertStretch(0);
