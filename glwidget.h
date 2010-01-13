@@ -124,6 +124,14 @@ private:
 
 	int vel;
 
+	FlowGeometry* geometry;
+	FlowChannel* channel3;
+	GLuint channel3Texture;
+
+	GLuint vertexShader;
+	GLuint fragmentShader;
+	GLuint gridProgram;
+
 	//! The OpenGL id for the frame buffer object used for rendering the transfer function texture.
 	GLuint fbo_transfer;
 
@@ -147,6 +155,10 @@ private:
 
 	//! The OpenGL id for the arrow sprite texture.
 	GLuint sprite;
+
+	GLuint fbo_grid;
+	GLuint gridTexture;
+	GLuint depth_rb_grid;
 
 	//! Utility function to get the next higher power of two for any given integer.
 	/*!

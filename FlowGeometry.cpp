@@ -1,6 +1,8 @@
 #include "FlowGeometry.h"
 #include "reverseBytes.h"
 
+#include <QDebug>
+
 bool FlowGeometry::readFromFile(char* header, FILE* fp, bool bigEndian)
 {
 	isFlipped = false;
@@ -45,7 +47,17 @@ bool FlowGeometry::readFromFile(char* header, FILE* fp, bool bigEndian)
     std::cout << "X Boundaries: " << boundaryMin[0] << " ... " << boundaryMax[0] << std::endl;
     std::cout << "Y Boundaries: " << boundaryMin[1] << " ... " << boundaryMax[1] << std::endl;
     
-    return true;
+	qDebug() << "X Boundaries - Min: " << boundaryMin[0];
+	qDebug() << "X Boundaries - Max: " << boundaryMax[0];
+	qDebug() << "Y Boundaries - Min: " << boundaryMin[1];
+	qDebug() << "Y Boundaries - Max: " << boundaryMax[1];
+
+	for (int j = 0; j < getDimX()*getDimY(); j++) {
+		geometryData[j][0] = (geometryData[j].v[0] - boundaryMin.v[0]) / boundarySize.v[0];
+		geometryData[j][1] = (geometryData[j].v[1] - boundaryMin.v[1]) / boundarySize.v[1];
+	}
+
+	return true;
 }
 
 FlowGeometry::FlowGeometry()

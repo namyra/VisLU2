@@ -177,6 +177,14 @@
 				RelativePath=".\GLSL\arrow.vert"
 				>
 			</File>
+			<File
+				RelativePath=".\GLSL\color.frag"
+				>
+			</File>
+			<File
+				RelativePath=".\GLSL\color.vert"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\readme.txt"

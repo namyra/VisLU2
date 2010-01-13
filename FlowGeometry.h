@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <iostream>
 #include "vec3.h"
+
 ///class for handling the geometry == rectangular grids organized in vertices and cells
 class FlowGeometry{
 		friend class FlowData;
@@ -16,10 +17,10 @@ class FlowGeometry{
 		vec3 boundaryMax;
 		///boundary sizes for the dataset geometry sotred as (maX - minX, maxY - minY)
 		vec3 boundarySize;
-	    
+/*	    
 		///Storage for the geometry
 		vec3* geometryData;
-
+*/
 		///returns general vtxID for the vertex array indexes
 		int getVtx(int x, int y);
 		///returns X index for the general vtxID
@@ -92,6 +93,10 @@ class FlowGeometry{
 		vec3 normalizeCoords(vec3 pos);
 		///inverts the compression. From values of <0,1> it restores the real geometrical coordinates
 		vec3 unNormalizeCoords(vec3 pos);
+
+
+		///Storage for the geometry
+		vec3* geometryData;
 };
 
 #endif
