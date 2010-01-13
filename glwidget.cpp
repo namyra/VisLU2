@@ -341,6 +341,8 @@ void GLWidget::resizeGL(int width, int height)
 
 void GLWidget::paintGL()
 {
+	static bool init = false;
+
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glMatrixMode(GL_PROJECTION);
@@ -353,96 +355,102 @@ void GLWidget::paintGL()
 	glDisable(GL_BLEND);
 
 	//check_gl_error("test");
-	
-	glColor3f(1, 1, 1);
+	if (init) {
 
-	glUseProgram(gridProgram);
-	//glUseProgram(0);
+		glColor3f(1, 1, 1);
 
-	glEnable(GL_TEXTURE_RECTANGLE_ARB);
-	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
-	
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gridTexture);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, channel3Texture);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, transferTexture);
+		glUseProgram(gridProgram);
+		//glUseProgram(0);
 
-	glUniform1iARB(glGetUniformLocation(gridProgram, "tex_grid"), 0);
-	glUniform1iARB(glGetUniformLocation(gridProgram, "tex_channel3"), 1);
-	glUniform1iARB(glGetUniformLocation(gridProgram, "tex_transfer"), 2);
+		glEnable(GL_TEXTURE_RECTANGLE_ARB);
+		glActiveTexture(GL_TEXTURE0);
+		glEnable(GL_TEXTURE_2D);
+		
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gridTexture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, velocityTexture);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, transferTexture);
 
-	//glBindTexture(GL_TEXTURE_2D, transferTexture);
-	/*glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gridTexture);
-	glDisable(GL_TEXTURE_RECTANGLE_ARB);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_CULL_FACE);*/
+		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_grid"), 0);
+		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_channel3"), 1);
+		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_transfer"), 2);
 
-	//glTranslatef(-0.5, 0.5, 0);
-	//glTranslatef(-0.5, 0, 0);
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2f(0,0);
-	glTexCoord2f(1, 0.0f);
-	glVertex2f(width(),0);
-	glTexCoord2f(1, 1);
-	glVertex2f(width(),height());
-	glTexCoord2f(0.0f, 1);
-	glVertex2f(0,height());
-	glEnd();
-/*
-	glTranslatef(0.75, 0, 0);
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(-0.5,-0.5,-1);
-	glTexCoord2f(1, 0.0f);
-	glVertex3f(0.5,-0.5,-1);
-	glTexCoord2f(1, 1);
-	glVertex3f(0.5,0.5,-1);
-	glTexCoord2f(0.0f, 1);
-	glVertex3f(-0.5,0.5,-1);
-	glEnd();
-*/
-	glUseProgram(0);
+		//glBindTexture(GL_TEXTURE_2D, transferTexture);
+		/*glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gridTexture);
+		glDisable(GL_TEXTURE_RECTANGLE_ARB);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_CULL_FACE);*/
 
-	glBegin(GL_QUADS);
+		//glTranslatef(-0.5, 0.5, 0);
+		//glTranslatef(-0.5, 0, 0);
+		glBegin(GL_QUADS);
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(0,0,-0.8);
-		glTexCoord2f(314, 0.0f);
-		glVertex3f(width(),0,-0.8);
-		glTexCoord2f(314, 538);
-		glVertex3f(width(),height(),-0.8);
-		glTexCoord2f(0.0f, 538);
-		glVertex3f(0,height(),-0.8);
-	glEnd();
+		glVertex2f(0,0);
+		glTexCoord2f(1, 0.0f);
+		glVertex2f(width(),0);
+		glTexCoord2f(1, 1);
+		glVertex2f(width(),height());
+		glTexCoord2f(0.0f, 1);
+		glVertex2f(0,height());
+		glEnd();
+	/*
+		glTranslatef(0.75, 0, 0);
+		glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-0.5,-0.5,-1);
+		glTexCoord2f(1, 0.0f);
+		glVertex3f(0.5,-0.5,-1);
+		glTexCoord2f(1, 1);
+		glVertex3f(0.5,0.5,-1);
+		glTexCoord2f(0.0f, 1);
+		glVertex3f(-0.5,0.5,-1);
+		glEnd();
+	*/
+		glUseProgram(0);
 
-	glUseProgram(arrowProgram);
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 0.0f);
+			glVertex3f(0,0,-0.8);
+			glTexCoord2f(314, 0.0f);
+			glVertex3f(width(),0,-0.8);
+			glTexCoord2f(314, 538);
+			glVertex3f(width(),height(),-0.8);
+			glTexCoord2f(0.0f, 538);
+			glVertex3f(0,height(),-0.8);
+		glEnd();
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, sprite);
+		glUseProgram(arrowProgram);
 
-	glUniform1i(glGetUniformLocation(arrowProgram, "arrow"), 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, sprite);
 
-	glEnable(GL_POINT_SPRITE);
-	glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-	glPointSize(min(width(), height())/40);
-	glEnable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
-	glBegin(GL_POINTS);
-		for(int i = 1; i < 20; i++)
-		{
-			for(int j = 1; j < 20; j++)
+		glUniform1i(glGetUniformLocation(arrowProgram, "arrow"), 0);
+
+		//glActiveTexture(GL_TEXTURE1);
+		//glBindTexture(GL_TEXTURE_RECTANGLE_ARB, velocityTexture);
+		//glUniform1i(glGetUniformLocation(arrowProgram, "velocity_tex"), 1);
+
+		glEnable(GL_POINT_SPRITE);
+		glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+		glPointSize(min(width(), height())/40);
+		glEnable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
+		glBegin(GL_POINTS);
+			for(int i = 1; i < 20; i++)
 			{
-				glVertex3f(i/20.0 * width(), j/20.0 * height(), 0);
+				for(int j = 1; j < 20; j++)
+				{
+					glVertex3f(i/20.0 * width(), j/20.0 * height(), 0);
+				}
 			}
-		}
-	glEnd();
+		glEnd();
 
-	//glPopMatrix();
-	//glPopMatrix();
-
+		//glPopMatrix();
+		//glPopMatrix();
+	}
+	init = true;
 }
 
 void GLWidget::timeOut()
@@ -505,7 +513,7 @@ void GLWidget::loadDataSet(std::string fileName)
 	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	check_gl_error("grid tex parameters wrapping");
 
-	channel3 = dataset->getChannel(3);
+	channel3 = dataset->getChannel(4);
 	float channel3Min = channel3->getMin();
 	float channel3Max = channel3->getMax();
 	float channel3Ranger = channel3->getRange();
