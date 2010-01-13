@@ -22,8 +22,7 @@ private:
     ///Stores the underlying geometry
     FlowGeometry geometry;
     
-    ///is the channel slot free?
-    bool freeChannel[max_channels];    
+  
     ///stores the values of data channels for one time step. For time-dependent data, the best solution is to create a separate class handling channels in one timestep and to instanciate this class for all timesteps.
     FlowChannel* channels[max_channels];
 
@@ -32,6 +31,9 @@ public:
     FlowData();
     ///destoys all created channels
     ~FlowData();
+
+    ///is the channel slot free?
+    bool freeChannel[max_channels];
 
     ///Loads a dataset, returns true if everything successful. You have to specify the byte order used in the data
     bool loadDataset(string filename, bool bigEndian);

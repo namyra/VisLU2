@@ -31,12 +31,9 @@ GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
 	updateGL();
 
 	dataset = new FlowData();
-	//dataset->loadDataset("dat\\c_block", false);
-	loadDataSet("dat\\c_block");
-/*	chX = dataset->createChannelGeometry(0);
-	chY = dataset->createChannelGeometry(1);
-	vel = dataset->createChannelVectorLength(0,1,2);
-*/
+	//loadDataSet("dat\\c_block");
+	loadDataSet("dat\\hurricane_p_tc_singletime10");
+
 }
 
 GLWidget::~GLWidget() {
@@ -56,8 +53,8 @@ void GLWidget::check_gl_error (std::string from) {
 	char buf[100];
 	GLenum i;
 	const char *e;
-	qDebug() << "";
-	qDebug() << from.c_str();
+	//qDebug() << "";
+	//qDebug() << from.c_str();
 	switch ((i = glGetError())) {
 		case GL_NO_ERROR: std::cout << "no error"; break;
 		case GL_INVALID_ENUM:          qDebug() << "invalid enum";      break;
@@ -67,7 +64,8 @@ void GLWidget::check_gl_error (std::string from) {
 		case GL_STACK_UNDERFLOW:       qDebug() <<  "stack underflow";   break;
 		case GL_OUT_OF_MEMORY:         qDebug() <<  "out of memory";     break;
 		default:
-		qDebug() << "unknown error"; break;
+		//qDebug() << "unknown error";
+			break;
 	}
 }
 
@@ -150,8 +148,8 @@ void GLWidget::setShaders(void)
 
 	if(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT)!=GL_FRAMEBUFFER_COMPLETE_EXT)
 	{
-		qDebug() << "the FBO is not complete";
-		qDebug() << "Error: " << glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+		//qDebug() << "the FBO is not complete";
+		//qDebug() << "Error: " << glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 	}
 
 	tf->setFBO(fbo_transfer, transferTexture);
@@ -212,22 +210,22 @@ void GLWidget::setShaders(void)
 
 	glGetProgramiv(gridProgram, GL_LINK_STATUS, &linked);
 
-	if (!compiledv)
-		qDebug() << "vertex shader not compiled";
-	if (!compiledf)
-		qDebug() << "fragment shader not compiled";
+	//if (!compiledv)
+		//qDebug() << "vertex shader not compiled";
+	//if (!compiledf)
+		//qDebug() << "fragment shader not compiled";
 
-	if (!linked)
-		qDebug() << "not linked ";
+	//if (!linked)
+		//qDebug() << "not linked ";
 
 	GLchar log[40960];
 	GLint len;
 	glGetShaderInfoLog(vertexShader, 40960, &len, log); 
-	qDebug() << log;
+	//qDebug() << log;
 	std::cout << log << std::endl;
 
 	glGetShaderInfoLog(fragmentShader, 40960, &len, log); 
-	qDebug() << log;
+	//qDebug() << log;
 	std::cout << log << std::endl;
 
 	glGetShaderiv(arrowShaderV, GL_COMPILE_STATUS, &compiledv);
@@ -236,27 +234,19 @@ void GLWidget::setShaders(void)
 	glGetProgramiv(arrowProgram, GL_LINK_STATUS, &linked);
 
 	if (!compiledv)
-		qDebug() << "vertex shader not compiled";
+		//qDebug() << "vertex shader not compiled";
 	if (!compiledf)
-		qDebug() << "fragment shader not compiled";
+		//qDebug() << "fragment shader not compiled";
 
 	if (!linked)
-		qDebug() << "not linked ";
+		//qDebug() << "not linked ";
 
 	glGetShaderInfoLog(arrowShaderV, 40960, &len, log); 
 	std::cout << log << std::endl;
-	qDebug() << log;
+	//qDebug() << log;
 
 	glGetShaderInfoLog(arrowShaderF, 40960, &len, log); 
 	std::cout << log << std::endl;
-	qDebug() << log;
-
-	//glGetShaderInfoLog(rayShaderV, 40960, &len, log); 
-	//std::cout << log << std::endl;
-	//qDebug() << log;
-
-	//glGetShaderInfoLog(rayShaderF, 40960, &len, log); 
-	//std::cout << log << std::endl;
 	//qDebug() << log;
 
 	glUseProgram(gridProgram);
@@ -281,26 +271,26 @@ void GLWidget::initializeGL()
 	if (err != GLEW_OK) {
 		// glewInit failed, something is seriously wrong
 		std::cerr << "Error initializing GLEW: " << glewGetErrorString(err) << std::endl;
-		qDebug() << "Error initializing GLEW";
+		//qDebug() << "Error initializing GLEW";
 		exit(1);
 	}
 	std::cout << "- GLEW initialized." << std::endl << std::endl;
 
 	if (glewIsSupported("GL_VERSION_2_0")) {
 		printf("Ready for OpenGL 2.0\n");
-		qDebug() << "Ready for OpenGL 2.0";
+		//qDebug() << "Ready for OpenGL 2.0";
 	}else {
 		printf("OpenGL 2.0 not supported\n");
-		qDebug() << "OpenGL 2.0 not supported";
+		//qDebug() << "OpenGL 2.0 not supported";
 		exit(1);
 	}
 
 	if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader) {
 		printf("Ready for GLSL\n");
-		qDebug() << "Ready for GLSL";
+		//qDebug() << "Ready for GLSL";
 	} else {
 		printf("Not totally ready :( \n");
-		qDebug() << "Not totally ready";
+		//qDebug() << "Not totally ready";
 		exit(1);
 	}
 
@@ -373,7 +363,6 @@ void GLWidget::paintGL()
 		glColor3f(1, 1, 1);
 
 		glUseProgram(gridProgram);
-		//glUseProgram(0);
 
 		glEnable(GL_TEXTURE_RECTANGLE_ARB);
 		glActiveTexture(GL_TEXTURE0);
@@ -382,7 +371,7 @@ void GLWidget::paintGL()
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gridTexture);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, velocityTexture);
+		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, channel3Texture);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, transferTexture);
 
@@ -390,14 +379,6 @@ void GLWidget::paintGL()
 		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_channel3"), 1);
 		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_transfer"), 2);
 
-		//glBindTexture(GL_TEXTURE_2D, transferTexture);
-		/*glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gridTexture);
-		glDisable(GL_TEXTURE_RECTANGLE_ARB);
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_CULL_FACE);*/
-
-		//glTranslatef(-0.5, 0.5, 0);
-		//glTranslatef(-0.5, 0, 0);
 		glBegin(GL_QUADS);
 		glTexCoord2f(0.0f, 0.0f);
 		glVertex2f(0,0);
@@ -408,19 +389,7 @@ void GLWidget::paintGL()
 		glTexCoord2f(0.0f, 1);
 		glVertex2f(0,height());
 		glEnd();
-	/*
-		glTranslatef(0.75, 0, 0);
-		glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(-0.5,-0.5,-1);
-		glTexCoord2f(1, 0.0f);
-		glVertex3f(0.5,-0.5,-1);
-		glTexCoord2f(1, 1);
-		glVertex3f(0.5,0.5,-1);
-		glTexCoord2f(0.0f, 1);
-		glVertex3f(-0.5,0.5,-1);
-		glEnd();
-	*/
+
 		glUseProgram(0);
 
 		glBegin(GL_QUADS);
@@ -438,9 +407,6 @@ void GLWidget::paintGL()
 			drawArrows();
 	}
 	init = true;
-	//glPopMatrix();
-	//glPopMatrix();
-
 }
 
 void GLWidget::drawArrows()
@@ -456,6 +422,7 @@ void GLWidget::drawArrows()
 	glUniform1i(glGetUniformLocation(arrowProgram, "velocity"), 1);
 
 	glEnable(GL_POINT_SPRITE);
+	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 	glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 	glPointSize(min(width(), height())/40);
 	glEnable(GL_BLEND);
@@ -469,8 +436,6 @@ void GLWidget::drawArrows()
 		}
 	}
 	glEnd();
-		//glPopMatrix();
-		//glPopMatrix();
 }
 
 void GLWidget::timeOut()
@@ -495,6 +460,12 @@ const int GLWidget::GetNextPowerOfTwo(const int iNumber)
 
 void GLWidget::loadDataSet(std::string fileName)
 {
+	int i = 0;
+	while (!dataset->freeChannel[i]) {
+		dataset->deleteChannel(i);
+		i++;
+	}
+
 	dataset->loadDataset(fileName, false);
 	chX = dataset->createChannelGeometry(0);
 	chY = dataset->createChannelGeometry(1);
@@ -511,19 +482,8 @@ void GLWidget::loadDataSet(std::string fileName)
 	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, geometry->getDimX(), geometry->getDimY(), 0, GL_RGB, GL_FLOAT, geometry->geometryData);
 	check_gl_error("teximage2d grid texture");
 
-	qDebug() << "dimX: " << geometry->getDimX();
-	qDebug() << "dimY: " << geometry->getDimY();
-
-/*	float* test = (float*) malloc(sizeof(float) * geometry->getDimX() * geometry->getDimY() * 3);
-	glGetTexImage(GL_TEXTURE_RECTANGLE_ARB, 0 , GL_RGB, GL_FLOAT, test);
-
-	qDebug() << "testing[0]: " << test[0];
-	qDebug() << "testing[0]: " << test[1];
-	qDebug() << "testing[0]: " << test[2];
-	qDebug() << "testing[313]: " << test[313*3];
-	qDebug() << "testing[313]: " << test[313*3+1];
-	qDebug() << "testing[313]: " << test[313*3+2];
-*/
+	//qDebug() << "dimX: " << geometry->getDimX();
+	//qDebug() << "dimY: " << geometry->getDimY();
 
 	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -543,24 +503,24 @@ void GLWidget::loadDataSet(std::string fileName)
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, channel3Texture);
 	check_gl_error("bind data texture");
 
-	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_LUMINANCE, geometry->getDimX(), 10, 0, GL_LUMINANCE, GL_FLOAT, channel3);
+	//glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_LUMINANCE16F_ARB, geometry->getDimX(), 10, 0, GL_LUMINANCE, GL_FLOAT, channel3);
 	check_gl_error("teximage2d data texture");
 
-	//glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
+	int vel = dataset->createChannelVectorLength(0,1,2);
 
 	FlowChannel* v1 = dataset->getChannel(0);
 	FlowChannel* v2 = dataset->getChannel(1);
-	FlowChannel* v3 = dataset->getChannel(2);
+	FlowChannel* v3 = dataset->getChannel(vel);
 
-/*	qDebug() << "testing[0]: " << v1->getRawValue(0);
-	qDebug() << "testing[0]: " << v2->getRawValue(0);
-	qDebug() << "testing[0]: " << v3->getRawValue(0);
-	qDebug() << "testing[313]: " << v1->getRawValue(313);
-	qDebug() << "testing[313]: " << v2->getRawValue(313);
-	qDebug() << "testing[313]: " << v3->getRawValue(313);
-	qDebug() << "testing[555]: " << v1->getRawValue(555);
-	qDebug() << "testing[555]: " << v2->getRawValue(555);
-	qDebug() << "testing[555]: " << v3->getRawValue(555);*/
+/*	//qDebug() << "testing[0]: " << v1->getRawValue(0);
+	//qDebug() << "testing[0]: " << v2->getRawValue(0);
+	//qDebug() << "testing[0]: " << v3->getRawValue(0);
+	//qDebug() << "testing[313]: " << v1->getRawValue(313);
+	//qDebug() << "testing[313]: " << v2->getRawValue(313);
+	//qDebug() << "testing[313]: " << v3->getRawValue(313);
+	//qDebug() << "testing[555]: " << v1->getRawValue(555);
+	//qDebug() << "testing[555]: " << v2->getRawValue(555);
+	//qDebug() << "testing[555]: " << v3->getRawValue(555);*/
 
 	float* velocity = (float*) malloc(sizeof(float) * geometry->getDimX() * geometry->getDimY() * 3);
 	for (int i = 0; i < geometry->getDimX()*geometry->getDimY(); i++) {
@@ -578,15 +538,15 @@ void GLWidget::loadDataSet(std::string fileName)
 	float* test = (float*) malloc(sizeof(float) * geometry->getDimX() * geometry->getDimY() * 3);
 	glGetTexImage(GL_TEXTURE_RECTANGLE_ARB, 0 , GL_RGB, GL_FLOAT, test);
 
-/*	qDebug() << "testing[0]: " << test[0];
-	qDebug() << "testing[0]: " << test[1];
-	qDebug() << "testing[0]: " << test[2];
-	qDebug() << "testing[313]: " << test[313*3];
-	qDebug() << "testing[313]: " << test[313*3+1];
-	qDebug() << "testing[313]: " << test[313*3+2];
-	qDebug() << "testing[555]: " << test[555*3];
-	qDebug() << "testing[555]: " << test[555*3+1];
-	qDebug() << "testing[555]: " << test[555*3+2];*/
+/*	//qDebug() << "testing[0]: " << test[0];
+	//qDebug() << "testing[0]: " << test[1];
+	//qDebug() << "testing[0]: " << test[2];
+	//qDebug() << "testing[313]: " << test[313*3];
+	//qDebug() << "testing[313]: " << test[313*3+1];
+	//qDebug() << "testing[313]: " << test[313*3+2];
+	//qDebug() << "testing[555]: " << test[555*3];
+	//qDebug() << "testing[555]: " << test[555*3+1];
+	//qDebug() << "testing[555]: " << test[555*3+2];*/
 
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
 }

@@ -5,13 +5,11 @@ uniform sampler2DRect velocity;
  
 void main()
 {
-	float vel_x = texture2DRect(velocity, gl_Vertex.xy).r;
-	float vel_y = texture2DRect(velocity, gl_Vertex.xy).g;
-	//float vel_x = gl_Vertex.x;
-	//float vel_y = gl_Vertex.y;
-	float cos = vel_x/sqrt(vel_x * vel_x + vel_y * vel_y);
-	float sin = vel_y/sqrt(vel_x * vel_x + vel_y * vel_y);
+	vec3 vel = texture2DRect(velocity, gl_Vertex.xy).rgb;
+	float cos = vel.x/sqrt(vel.x * vel.x + vel.y * vel.y);
+	float sin = vel.y/sqrt(vel.x * vel.x + vel.y * vel.y);
 	rot = mat2(cos, -sin, sin, cos);
 	gl_TexCoord[0] = gl_MultiTexCoord0;
 	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+	gl_PointSize = min(32.0, vel.z * 6.0 + 6.0);
 }
