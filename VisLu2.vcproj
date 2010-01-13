@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="VisLu2"
 	ProjectGUID="{DB3B3813-B79E-4D53-89B3-3247E84F2B85}"
 	RootNamespace="VisLu1"
@@ -24,13 +24,13 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="qmake -project -r &amp;&amp; qmake -makefile -o Makefile &quot;QT += opengl&quot; &quot;LIBS+=openglut\lib\OpenGLUT.lib&quot; &quot;LIBS+=glew\lib\glew32.lib&quot; &amp;&amp; nmake debug-all"
+				BuildCommandLine="qmake -project -r &amp;&amp; qmake -makefile -o Makefile &quot;QT += opengl&quot; &quot;LIBS+=openglut\lib\OpenGLUT.lib&quot; &quot;LIBS+=glew\lib\glew32.lib&quot; &quot;LIBS+=devil\lib\DevIL.lib&quot; &amp;&amp; nmake debug-all"
 				ReBuildCommandLine=""
 				CleanCommandLine=""
 				Output="debug\VisLu2.exe"
 				PreprocessorDefinitions="WIN32;_DEBUG"
-				IncludeSearchPath="&quot;$(WindowsSdkDir)lib;$(SolutionDir)openglut\lib&quot;;&quot;$(SolutionDir)glew\lib&quot;;&quot;$(SolutionDir)devil\lib&quot;"
-				ForcedIncludes="&quot;$(WindowsSdkDir)include;$(SolutionDir)openglut\include&quot;;&quot;$(SolutionDir)glew\include&quot;;&quot;$(SolutionDir)devil\include&quot;"
+				IncludeSearchPath="&quot;$(WindowsSdkDir)lib&quot;;&quot;$(SolutionDir)openglut\lib&quot;;&quot;$(SolutionDir)glew\lib&quot;;&quot;$(SolutionDir)devil\lib&quot;"
+				ForcedIncludes="&quot;$(WindowsSdkDir)include&quot;;&quot;$(SolutionDir)openglut\include&quot;;&quot;$(SolutionDir)glew\include&quot;;&quot;$(SolutionDir)devil\include&quot;"
 				AssemblySearchPath=""
 				ForcedUsingAssemblies=""
 				CompileAsManaged=""
@@ -169,6 +169,14 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\GLSL\arrow.frag"
+				>
+			</File>
+			<File
+				RelativePath=".\GLSL\arrow.vert"
+				>
+			</File>
 			<File
 				RelativePath=".\GLSL\color.frag"
 				>

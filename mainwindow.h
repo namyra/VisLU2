@@ -41,10 +41,13 @@ private:
     GLWidget *glWidget;
 
 	//! The Qt scene used to display the transfer function.
-//	QGraphicsScene *transferScene;
+	QGraphicsScene *transferScene;
 
 	//! The widget displaying the transfer function.
-//	TFView *transferView;
+	TFView *transferView;
+
+	//! The button to clear the TF view.
+	QPushButton *clearButton;
 
 	//! The File menu.
 	QMenu *fileMenu;

@@ -15,14 +15,18 @@ MainWindow::MainWindow()
 
     glWidget = new GLWidget(50, widget);
 
-	//transferScene = new QGraphicsScene;
-	//transferView = new TFView(transferScene, glWidget->transferFunction());
-	//transferView->show();
-	//transferView->setMaximumHeight(150);
+	transferScene = new QGraphicsScene;
+	transferView = new TFView(transferScene, glWidget->transferFunction());
+	transferView->show();
+	transferView->setMaximumHeight(150);
+	clearButton = new QPushButton("Clear", widget);
 
-    sideBar = new QGroupBox;
+	connect(clearButton, SIGNAL(clicked()), transferView, SLOT(clearTF()));
+
+	sideBar = new QGroupBox;
     QVBoxLayout *sideBarLayout = new QVBoxLayout;
-	//sideBarLayout->addWidget(transferView);
+	sideBarLayout->addWidget(transferView);
+	sideBarLayout->addWidget(clearButton);
     sideBarLayout->insertStretch(0);
     sideBar->setFixedWidth(300);
     sideBar->setLayout(sideBarLayout);
@@ -70,17 +74,15 @@ MainWindow::MainWindow()
 		}
 	} while(foundOne);
 	 
-	//qint32 sceneWidth = transferView->viewport()->width();
-	//qint32 sceneHeight = transferView->viewport()->height();
+	qint32 sceneWidth = transferView->viewport()->width();
+	qint32 sceneHeight = transferView->viewport()->height();
 
-	//transferView->setSceneRect(QRectF(0, 0, sceneWidth, sceneHeight));
+	transferView->setSceneRect(QRectF(0, 0, sceneWidth, sceneHeight));
 
     setMinimumSize(800, 600);
     setWindowTitle("SimpleVis");
 
-//	glWidget->loadDataSet("dat/stagbeetle277x277x164.dat");
-
-	//transferView->drawTF();
+	transferView->drawTF();
 }
 
 MainWindow::~MainWindow()
@@ -90,7 +92,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::loadDataset()
 {
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Load Dataset"), "", tr("Volume Data (*.dat)"));
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Load Dataset"), "", tr("Flow Geometry (*.gri)"));
 	if(!fileName.isNull())
 		glWidget->loadDataSet(fileName.toStdString());
 }

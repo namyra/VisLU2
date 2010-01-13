@@ -19,9 +19,10 @@
 	The x-axis represents the density values, the y-axis the opacity of a node.
 	A histogram of the currently loaded volume dataset is shown in the background.
 */
-class TFView :
-	public QGraphicsView
+class TFView : public QGraphicsView
 {
+	Q_OBJECT
+
 public:
 
 	//! Constructor.
@@ -50,18 +51,21 @@ public:
 	*/
 	void mousePressEvent(QMouseEvent *event);
 
-	//! Helper function that clears the scene.
-	/*!
-		Removes all items in the scene.
-	*/
-	void clear();
-
 	//! Generates the scene and draws the view.
 	/*!
 		First clears the scene, then creates the bars for the histogram, the nodes, and the lines connecting them, then finally updates the widget.
 		\sa clear()
 	*/
 	void drawTF();
+
+	//! Helper function that clears the scene.
+	/*!
+		Removes all items in the scene.
+	*/
+	void clear();
+
+public slots:
+	void clearTF();
 
 private:
 

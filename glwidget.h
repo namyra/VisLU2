@@ -144,6 +144,18 @@ private:
 	//! The transfer texture used by this widget.
 	TFTexture *tf;
 
+	//! The OpenGL id for the vertex shader for the arrow plot.
+	GLuint arrowShaderV;
+
+	//! The OpenGL id for the fragment shader for the arrow plot.
+	GLuint arrowShaderF;
+
+	//! The OpenGL id for the arrow plot shader program.
+	GLuint arrowProgram;
+
+	//! The OpenGL id for the arrow sprite texture.
+	GLuint sprite;
+
 	GLuint fbo_grid;
 	GLuint gridTexture;
 	GLuint depth_rb_grid;

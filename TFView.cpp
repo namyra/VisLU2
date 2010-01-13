@@ -28,6 +28,13 @@ void TFView::clear()
 	}
 }
 
+void TFView::clearTF()
+{
+	tf->clear();
+	tf->generate();
+	drawTF();
+}
+
 void TFView::drawTF()
 {
 	qint32 sceneWidth = viewport()->width();
@@ -38,10 +45,10 @@ void TFView::drawTF()
 	std::map<int, TFNode>::iterator node;
 	TFNode thisNode, prevNode;
 	
-	for (unsigned int i = 1; i < 256; i++) {
-		QPen pen(QColor(i, 0.25, 255 - i, 255), 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-		scene()->addLine(static_cast<double>(i) / 256 * sceneWidth, sceneHeight, static_cast<double>(i) / 256 * sceneWidth, sceneHeight * (1 - tf->histogram[i]), pen);
-	}
+	//for (unsigned int i = 1; i < 256; i++) {
+	//	QPen pen(QColor(i, 0.25, 255 - i, 255), 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+	//	scene()->addLine(static_cast<double>(i) / 256 * sceneWidth, sceneHeight, static_cast<double>(i) / 256 * sceneWidth, sceneHeight * (1 - tf->histogram[i]), pen);
+	//}
 
 	QPen pen2(Qt::black, 1, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin);
 
@@ -98,12 +105,6 @@ void TFView::mousePressEvent(QMouseEvent *event)
 		if(scene()->itemAt(pos) && scene()->itemAt(pos)->type() == 3)
 		{
 			tf->removeNode((scene()->itemAt(pos)->pos().x() + 4) / sceneWidth * 2048);
-			tf->generate();
-			drawTF();
-		}
-		else
-		{
-			tf->clear();
 			tf->generate();
 			drawTF();
 		}
