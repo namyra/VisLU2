@@ -124,6 +124,17 @@ bool FlowData::loadDataset(string filename, bool bigEndian)
 
 	delete[] ch;
 	delete[] tmpArray;
+
+	qDebug() << "channel3Min " << getChannel(3)->getMin();
+	qDebug() << "channel3Max " << getChannel(3)->getMax();
+	qDebug() << "channel3Range " << getChannel(3)->getRange();
+	qDebug() << "channel3 test " << getChannel(3)->getValue(134050);
+
+	qDebug() << "Xmin: " << geometry.getMinX();
+	qDebug() << "Xmax: " << geometry.getMaxX();
+	qDebug() << "Ymin: " << geometry.getMinY();
+	qDebug() << "Ymax: " << geometry.getMaxY();
+
 	return true;
 }
 

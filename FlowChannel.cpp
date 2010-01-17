@@ -1,6 +1,8 @@
 #include "FlowChannel.h"
 #include <math.h>
 
+#include <QDebug>
+
 float FlowChannel::getValue(vec3 pos)
 {
     //IDs of cell vertices in the neighborhood of the sampled point
@@ -83,6 +85,10 @@ void FlowChannel::copyValues(float* rawdata, int vtxSize, int offset)
     }
     std::cout << "Maximum value in channel: " << maximum << std::endl;
     std::cout << "Minimum value in channel: " << minimum << std::endl;    
+
+    qDebug() << "Maximum value in channel: " << maximum;
+    qDebug() << "Minimum value in channel: " << minimum;    
+
 }
 
 float FlowChannel::getMin()

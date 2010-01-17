@@ -148,8 +148,8 @@ void GLWidget::setShaders(void)
 
 	if(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT)!=GL_FRAMEBUFFER_COMPLETE_EXT)
 	{
-		//qDebug() << "the FBO is not complete";
-		//qDebug() << "Error: " << glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+		qDebug() << "the FBO is not complete";
+		qDebug() << "Error: " << glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 	}
 
 	tf->setFBO(fbo_transfer, transferTexture);
@@ -188,10 +188,10 @@ void GLWidget::setShaders(void)
 	check_gl_error("compile shaders");
 
 	gridProgram = glCreateProgram();
-	//check_gl_error("create program");
+	check_gl_error("create program");
 	glAttachShader(gridProgram, vertexShader);
 	glAttachShader(gridProgram, fragmentShader);
-	//check_gl_error("attach shaders");
+	check_gl_error("attach shaders");
 	glLinkProgram(gridProgram);
 	check_gl_error("link program");
 
@@ -210,22 +210,22 @@ void GLWidget::setShaders(void)
 
 	glGetProgramiv(gridProgram, GL_LINK_STATUS, &linked);
 
-	//if (!compiledv)
-		//qDebug() << "vertex shader not compiled";
-	//if (!compiledf)
-		//qDebug() << "fragment shader not compiled";
+	if (!compiledv)
+		qDebug() << "vertex shader not compiled";
+	if (!compiledf)
+		qDebug() << "fragment shader not compiled";
 
-	//if (!linked)
-		//qDebug() << "not linked ";
+	if (!linked)
+		qDebug() << "not linked ";
 
 	GLchar log[40960];
 	GLint len;
 	glGetShaderInfoLog(vertexShader, 40960, &len, log); 
-	//qDebug() << log;
+	qDebug() << log;
 	std::cout << log << std::endl;
 
 	glGetShaderInfoLog(fragmentShader, 40960, &len, log); 
-	//qDebug() << log;
+	qDebug() << log;
 	std::cout << log << std::endl;
 
 	glGetShaderiv(arrowShaderV, GL_COMPILE_STATUS, &compiledv);
@@ -234,20 +234,20 @@ void GLWidget::setShaders(void)
 	glGetProgramiv(arrowProgram, GL_LINK_STATUS, &linked);
 
 	if (!compiledv)
-		//qDebug() << "vertex shader not compiled";
+		qDebug() << "vertex shader not compiled";
 	if (!compiledf)
-		//qDebug() << "fragment shader not compiled";
+		qDebug() << "fragment shader not compiled";
 
 	if (!linked)
-		//qDebug() << "not linked ";
+		qDebug() << "not linked ";
 
 	glGetShaderInfoLog(arrowShaderV, 40960, &len, log); 
 	std::cout << log << std::endl;
-	//qDebug() << log;
+	qDebug() << log;
 
 	glGetShaderInfoLog(arrowShaderF, 40960, &len, log); 
 	std::cout << log << std::endl;
-	//qDebug() << log;
+	qDebug() << log;
 
 	glUseProgram(gridProgram);
 	check_gl_error("use program");

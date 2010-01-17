@@ -141,22 +141,22 @@ bool FlowGeometry::getInterpolationAt(vec3 pos, int* vtxID, float* coef)
     return true;
 }
 
-inline float FlowGeometry::getMinX()
+float FlowGeometry::getMinX()
 {
     return boundaryMin[0];
 }
 
-inline float FlowGeometry::getMaxX()
+float FlowGeometry::getMaxX()
 {
     return boundaryMax[0];
 }
 
-inline float FlowGeometry::getMinY()
+float FlowGeometry::getMinY()
 {
     return boundaryMin[1];
 }
 
-inline float FlowGeometry::getMaxY()
+float FlowGeometry::getMaxY()
 {
     return boundaryMax[1];
 }
