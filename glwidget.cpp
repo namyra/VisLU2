@@ -23,8 +23,11 @@ GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
         timer->start(timerInterval);
     }
 
-	arrowPlot = true;
-	streamlines = false;
+	ball = Ball(100, 100, 1, 1);
+
+	arrowPlot = false;
+	streamlines = true;
+	pong = false;
 
 	tf = new TFTexture(this);
 
@@ -82,6 +85,11 @@ void GLWidget::toggleArrowPlot(bool enabled)
 void GLWidget::toggleStreamlines(bool enabled)
 {
 	streamlines = enabled;
+}
+
+void GLWidget::togglePong(bool enabled)
+{
+	pong = enabled;
 }
 
 char* GLWidget::readShader(char *fn) {
@@ -403,6 +411,15 @@ void GLWidget::paintGL()
 			glVertex3f(0,height(),-0.8);
 		glEnd();
 
+		if(pong)
+		{
+			updatePong();
+			drawPong();
+		}
+
+		if(streamlines)
+			drawStreamlines();
+
 		if(arrowPlot)
 			drawArrows();
 	}
@@ -432,10 +449,62 @@ void GLWidget::drawArrows()
 	{
 		for(int j = 1; j < 20; j++)
 		{
-			glVertex3f(i/20.0 * width(), j/20.0 * height(), 0);
+			glVertex2f(i/20.0 * width(), j/20.0 * height());
 		}
 	}
 	glEnd();
+}
+
+void GLWidget::drawStreamlines()
+{
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, velocityTexture);
+	float* dat = (float*) malloc(sizeof(float) * geometry->getDimX() * geometry->getDimY() * 3);
+	glGetTexImage(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, GL_FLOAT, dat);
+
+	glUseProgram(0);
+
+	glColor3f(0, 0, 0);
+	float x, nextX, y, nextY;
+	int index;
+
+	for(int i = 1; i < 40; i++)
+	{
+		for(int j = 1; j < 40; j++)
+		{
+			x = i/40.0 * width();
+			y = j/40.0 * height();
+
+			glBegin(GL_LINE_STRIP);
+
+			for(int k = 1; k < 50; k++)
+			{
+				glVertex2f(x, y);
+				//qDebug() << x;
+				//qDebug() << y;
+				index = ((int)x + (int)y * geometry->getDimX()) * 3;
+				if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
+				{
+					nextX = x + dat[index + 1];
+					nextY = y + dat[index];
+					x = nextX;
+					y = nextY;
+				}
+			}
+
+			glEnd();
+		}
+	}
+}
+
+void GLWidget::updatePong()
+{
+	ball.update();
+}
+
+void GLWidget::drawPong()
+{
+	ball.draw();
 }
 
 void GLWidget::timeOut()
