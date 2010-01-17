@@ -6,8 +6,8 @@ uniform sampler2DRect velocity;
 void main()
 {
 	vec3 vel = texture2DRect(velocity, gl_Vertex.xy).rgb;
-	float cos = vel.x/sqrt(vel.x * vel.x + vel.y * vel.y);
-	float sin = vel.y/sqrt(vel.x * vel.x + vel.y * vel.y);
+	float cos = vel.y/sqrt(vel.x * vel.x + vel.y * vel.y);
+	float sin = vel.x/sqrt(vel.x * vel.x + vel.y * vel.y);
 	rot = mat2(cos, -sin, sin, cos);
 	gl_TexCoord[0] = gl_MultiTexCoord0;
 	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
