@@ -25,8 +25,7 @@ GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
 
 	ball = Ball(100, 100, 1, 1);
 
-	arrowPlot = false;
-	streamlines = true;
+	rk = false;
 	pong = false;
 
 	tf = new TFTexture(this);
@@ -85,6 +84,11 @@ void GLWidget::toggleArrowPlot(bool enabled)
 void GLWidget::toggleStreamlines(bool enabled)
 {
 	streamlines = enabled;
+}
+
+void GLWidget::setRK(bool enabled)
+{
+	rk = enabled;
 }
 
 void GLWidget::togglePong(bool enabled)
@@ -465,8 +469,7 @@ void GLWidget::drawStreamlines()
 	glUseProgram(0);
 
 	glColor3f(0, 0, 0);
-	float x, nextX, y, nextY;
-	int index;
+	float x, y;
 
 	for(int i = 1; i < 40; i++)
 	{
@@ -480,20 +483,50 @@ void GLWidget::drawStreamlines()
 			for(int k = 1; k < 50; k++)
 			{
 				glVertex2f(x, y);
-				//qDebug() << x;
-				//qDebug() << y;
-				index = ((int)x + (int)y * geometry->getDimX()) * 3;
-				if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
-				{
-					nextX = x + dat[index + 1];
-					nextY = y + dat[index];
-					x = nextX;
-					y = nextY;
-				}
+				if(rk)
+					rungeKutta(&x, &y, dat);
+				else
+					euler(&x, &y, dat);
 			}
 
 			glEnd();
 		}
+	}
+}
+void GLWidget::euler(float *x, float *y, float *tex)
+{
+	float nextX, nextY;
+	int index;
+
+	index = ((int)*x + (int)*y * geometry->getDimX()) * 3;
+	if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
+	{
+		nextX = *x + tex[index + 1];
+		nextY = *y + tex[index];
+		*x = nextX;
+		*y = nextY;
+	}
+}
+
+void GLWidget::rungeKutta(float *x, float *y, float *tex)
+{
+	float tmpX, nextX, tmpY, nextY;
+	int index;
+
+	index = ((int)*x + (int)*y * geometry->getDimX()) * 3;
+	if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
+	{
+		tmpX = *x + tex[index + 1] / 2.0;
+		tmpY = *y + tex[index] / 2.0;
+	}
+
+	index = ((int)tmpX + (int)tmpY * geometry->getDimX()) * 3;
+	if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
+	{
+		nextX = *x + tex[index + 1];
+		nextY = *y + tex[index];
+		*x = nextX;
+		*y = nextY;
 	}
 }
 

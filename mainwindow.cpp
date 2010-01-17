@@ -23,6 +23,21 @@ MainWindow::MainWindow()
 	connect(checkStreamlines, SIGNAL(toggled(bool)), glWidget, SLOT(toggleStreamlines(bool)));
 	checkStreamlines->setChecked(true);
 
+    rkButtons = new QButtonGroup;
+    eulerButton = new QRadioButton("Euler");
+    eulerButton->setChecked(true);
+    rkButton = new QRadioButton("Runge-Kutta");
+    rkButtons->addButton(eulerButton, 0);
+    rkButtons->addButton(rkButton, 1);
+
+	connect(rkButton, SIGNAL(toggled(bool)), glWidget, SLOT(setRK(bool)));
+
+    rkGroup = new QGroupBox;
+    QHBoxLayout *rkGroupLayout = new QHBoxLayout;
+    rkGroupLayout->addWidget(eulerButton);
+    rkGroupLayout->addWidget(rkButton);
+    rkGroup->setLayout(rkGroupLayout);
+
 	transferScene = new QGraphicsScene;
 	transferView = new TFView(transferScene, glWidget->transferFunction());
 	transferView->show();
@@ -35,6 +50,7 @@ MainWindow::MainWindow()
     QVBoxLayout *sideBarLayout = new QVBoxLayout;
 	sideBarLayout->addWidget(checkArrowPlot);
 	sideBarLayout->addWidget(checkStreamlines);
+	sideBarLayout->addWidget(rkGroup);
 	sideBarLayout->addWidget(transferView);
 	sideBarLayout->addWidget(clearButton);
     sideBarLayout->insertStretch(0);

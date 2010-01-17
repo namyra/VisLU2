@@ -72,6 +72,7 @@ public:
 public slots:
 	void toggleArrowPlot(bool enabled);
 	void toggleStreamlines(bool enabled);
+	void setRK(bool enabled);
 	void togglePong(bool enabled);
 
 protected:
@@ -125,6 +126,8 @@ private:
 	
 	bool streamlines;
 
+	bool rk;
+
 	bool pong;
 
 	Ball ball;
@@ -177,6 +180,8 @@ private:
 
 	void drawArrows();
 	void drawStreamlines();
+	void euler(float *x, float *y, float *tex);
+	void rungeKutta(float *x, float *y, float *tex);
 	void updatePong();
 	void drawPong();
 
