@@ -67,7 +67,7 @@ void GLWidget::check_gl_error (std::string from) {
 		case GL_STACK_UNDERFLOW:       qDebug() <<  "stack underflow";   break;
 		case GL_OUT_OF_MEMORY:         qDebug() <<  "out of memory";     break;
 		default:
-		//qDebug() << "unknown error";
+			qDebug() << "unknown error";
 			break;
 	}
 }
@@ -547,6 +547,12 @@ void GLWidget::loadDataSet(std::string fileName)
 	check_gl_error("generate grid texture");
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gridTexture);
 	check_gl_error("bind grid texture");
+/*
+	qDebug() << "Xmin: " << geometry->getMinX();
+	qDebug() << "Xmax: " << geometry->getMaxX();
+	qDebug() << "Ymin: " << geometry->getMinY();
+	qDebug() << "Ymax: " << geometry->getMaxY();*/
+	//qDebug() << "range: " << channel3Range;
 
 	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, geometry->getDimX(), geometry->getDimY(), 0, GL_RGB, GL_FLOAT, geometry->geometryData);
 	check_gl_error("teximage2d grid texture");
@@ -561,18 +567,24 @@ void GLWidget::loadDataSet(std::string fileName)
 	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	check_gl_error("grid tex parameters wrapping");
-
-	channel3 = dataset->getChannel(4);
+	
+	FlowChannel* channel3 = dataset->getChannel(3);
 	float channel3Min = channel3->getMin();
 	float channel3Max = channel3->getMax();
-	float channel3Ranger = channel3->getRange();
+	float channel3Range = channel3->getRange();
+
+	float* channel3_v = (float*) malloc(sizeof(float) * geometry->getDimX() * geometry->getDimY());
+
+	for (int i = 0; i < geometry->getDimX()*geometry->getDimY(); i++) {
+		channel3_v[i] = (channel3->getRawValue(i) - channel3Min) / channel3Range;
+	}
 
 	glGenTextures(1, &channel3Texture);
 	check_gl_error("generate data texture");
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, channel3Texture);
 	check_gl_error("bind data texture");
 
-	//glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_LUMINANCE16F_ARB, geometry->getDimX(), 10, 0, GL_LUMINANCE, GL_FLOAT, channel3);
+	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_LUMINANCE16F_ARB, geometry->getDimX(), geometry->getDimY(), 0, GL_LUMINANCE, GL_FLOAT, channel3_v);
 	check_gl_error("teximage2d data texture");
 
 	int vel = dataset->createChannelVectorLength(0,1,2);
@@ -580,16 +592,6 @@ void GLWidget::loadDataSet(std::string fileName)
 	FlowChannel* v1 = dataset->getChannel(0);
 	FlowChannel* v2 = dataset->getChannel(1);
 	FlowChannel* v3 = dataset->getChannel(vel);
-
-/*	//qDebug() << "testing[0]: " << v1->getRawValue(0);
-	//qDebug() << "testing[0]: " << v2->getRawValue(0);
-	//qDebug() << "testing[0]: " << v3->getRawValue(0);
-	//qDebug() << "testing[313]: " << v1->getRawValue(313);
-	//qDebug() << "testing[313]: " << v2->getRawValue(313);
-	//qDebug() << "testing[313]: " << v3->getRawValue(313);
-	//qDebug() << "testing[555]: " << v1->getRawValue(555);
-	//qDebug() << "testing[555]: " << v2->getRawValue(555);
-	//qDebug() << "testing[555]: " << v3->getRawValue(555);*/
 
 	float* velocity = (float*) malloc(sizeof(float) * geometry->getDimX() * geometry->getDimY() * 3);
 	for (int i = 0; i < geometry->getDimX()*geometry->getDimY(); i++) {
