@@ -13,6 +13,7 @@
 #include <qgl.h>
 #include "FlowData.h"
 #include "TFTexture.h"
+#include "Ball.h"
 
 //! Display widget for the volume dataset.
 /*!
@@ -71,6 +72,7 @@ public:
 public slots:
 	void toggleArrowPlot(bool enabled);
 	void toggleStreamlines(bool enabled);
+	void togglePong(bool enabled);
 
 protected:
 
@@ -123,6 +125,10 @@ private:
 	
 	bool streamlines;
 
+	bool pong;
+
+	Ball ball;
+
 	//! The flow data.
 	FlowData *dataset;
 
@@ -170,6 +176,9 @@ private:
 	GLuint depth_rb_grid;
 
 	void drawArrows();
+	void drawStreamlines();
+	void updatePong();
+	void drawPong();
 
 	//! Utility function to get the next higher power of two for any given integer.
 	/*!

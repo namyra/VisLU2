@@ -16,9 +16,12 @@ MainWindow::MainWindow()
     glWidget = new GLWidget(50, widget);
 
 	checkArrowPlot = new QCheckBox("Arrow Plot", widget);
+	connect(checkArrowPlot, SIGNAL(toggled(bool)), glWidget, SLOT(toggleArrowPlot(bool)));
 	checkArrowPlot->setChecked(true);
 
-	connect(checkArrowPlot, SIGNAL(toggled(bool)), glWidget, SLOT(toggleArrowPlot(bool)));
+	checkStreamlines = new QCheckBox("Streamlines", widget);
+	connect(checkStreamlines, SIGNAL(toggled(bool)), glWidget, SLOT(toggleStreamlines(bool)));
+	checkStreamlines->setChecked(true);
 
 	transferScene = new QGraphicsScene;
 	transferView = new TFView(transferScene, glWidget->transferFunction());
@@ -31,6 +34,7 @@ MainWindow::MainWindow()
 	sideBar = new QGroupBox;
     QVBoxLayout *sideBarLayout = new QVBoxLayout;
 	sideBarLayout->addWidget(checkArrowPlot);
+	sideBarLayout->addWidget(checkStreamlines);
 	sideBarLayout->addWidget(transferView);
 	sideBarLayout->addWidget(clearButton);
     sideBarLayout->insertStretch(0);
