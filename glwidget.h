@@ -133,7 +133,7 @@ private:
 	int vel;
 
 	FlowGeometry* geometry;
-	FlowChannel* channel3;
+	//FlowChannel* channel3;
 	GLuint channel3Texture;
 	GLuint velocityTexture;
 
