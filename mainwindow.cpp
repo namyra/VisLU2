@@ -25,12 +25,12 @@ MainWindow::MainWindow()
 
     rkButtons = new QButtonGroup;
     eulerButton = new QRadioButton("Euler");
-    eulerButton->setChecked(true);
     rkButton = new QRadioButton("Runge-Kutta");
     rkButtons->addButton(eulerButton, 0);
     rkButtons->addButton(rkButton, 1);
 
 	connect(rkButton, SIGNAL(toggled(bool)), glWidget, SLOT(setRK(bool)));
+    rkButton->setChecked(true);
 
     rkGroup = new QGroupBox;
     QHBoxLayout *rkGroupLayout = new QHBoxLayout;
@@ -38,12 +38,18 @@ MainWindow::MainWindow()
     rkGroupLayout->addWidget(rkButton);
     rkGroup->setLayout(rkGroupLayout);
 
+	pauseButton = new QPushButton("Pause", widget);
+	connect(pauseButton, SIGNAL(clicked()), glWidget, SLOT(pausePong()));
+
+	resetButton = new QPushButton("Reset", widget);
+	connect(resetButton, SIGNAL(clicked()), glWidget, SLOT(resetPong()));
+
 	transferScene = new QGraphicsScene;
 	transferView = new TFView(transferScene, glWidget->transferFunction());
 	transferView->show();
 	transferView->setMaximumHeight(150);
-	clearButton = new QPushButton("Clear", widget);
 
+	clearButton = new QPushButton("Clear", widget);
 	connect(clearButton, SIGNAL(clicked()), transferView, SLOT(clearTF()));
 
 	sideBar = new QGroupBox;
@@ -51,6 +57,8 @@ MainWindow::MainWindow()
 	sideBarLayout->addWidget(checkArrowPlot);
 	sideBarLayout->addWidget(checkStreamlines);
 	sideBarLayout->addWidget(rkGroup);
+	sideBarLayout->addWidget(resetButton);
+	sideBarLayout->addWidget(pauseButton);
 	sideBarLayout->addWidget(transferView);
 	sideBarLayout->addWidget(clearButton);
     sideBarLayout->insertStretch(0);

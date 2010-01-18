@@ -74,6 +74,8 @@ public slots:
 	void toggleStreamlines(bool enabled);
 	void setRK(bool enabled);
 	void togglePong(bool enabled);
+	void resetPong();
+	void pausePong();
 
 protected:
 
@@ -123,17 +125,26 @@ private:
     QTimer *timer;
 
 	bool arrowPlot;
+
+	int numArrows;
 	
 	bool streamlines;
 
 	bool rk;
 
+	int numLines;
+	float stepSize;
+	int numSteps;
+
 	bool pong;
 
+	bool paused;
 	Ball ball;
 
 	//! The flow data.
 	FlowData *dataset;
+
+	float *velocity;
 
 	int chX;
 

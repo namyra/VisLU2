@@ -58,6 +58,12 @@ private:
 	//! The button that switches to Runge-Kutta algorithm.
 	QRadioButton *rkButton;
 
+	//! The button to reset the pong game.
+	QPushButton *resetButton;
+
+	//! The button to pause the pong game.
+	QPushButton *pauseButton;
+
 	//! The Qt scene used to display the transfer function.
 	QGraphicsScene *transferScene;
 
