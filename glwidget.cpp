@@ -554,7 +554,7 @@ void GLWidget::loadDataSet(std::string fileName)
 	qDebug() << "Ymax: " << geometry->getMaxY();*/
 	//qDebug() << "range: " << channel3Range;
 
-	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, geometry->getDimX(), geometry->getDimY(), 0, GL_RGB, GL_FLOAT, geometry->geometryData);
+	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, geometry->getDimX(), geometry->getDimY(), 0, GL_RGB, GL_FLOAT, geometry->geometryData);
 	check_gl_error("teximage2d grid texture");
 
 	//qDebug() << "dimX: " << geometry->getDimX();
