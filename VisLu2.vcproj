@@ -186,6 +186,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GLSL\arrowScale.vert"
+				>
+			</File>
+			<File
 				RelativePath=".\GLSL\color.frag"
 				>
 			</File>

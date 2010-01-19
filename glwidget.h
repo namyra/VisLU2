@@ -71,8 +71,13 @@ public:
 
 public slots:
 	void toggleArrowPlot(bool enabled);
+	void toggleArrowScale(bool enabled);
+	void setNumArrows(int num);
 	void toggleStreamlines(bool enabled);
 	void setRK(bool enabled);
+	void setNumLines(int num);
+	void setNumSteps(int num);
+	void setStepSize(float step);
 	void togglePong(bool enabled);
 	void resetPong();
 	void pausePong();
@@ -126,6 +131,7 @@ private:
 
 	bool arrowPlot;
 
+	bool arrowScale;
 	int numArrows;
 	
 	bool streamlines;
@@ -133,8 +139,8 @@ private:
 	bool rk;
 
 	int numLines;
-	float stepSize;
 	int numSteps;
+	float stepSize;
 
 	bool pong;
 
@@ -173,14 +179,20 @@ private:
 	//! The transfer texture used by this widget.
 	TFTexture *tf;
 
-	//! The OpenGL id for the vertex shader for the arrow plot.
+	//! The OpenGL id for the vertex shader for the arrow plot without scaling.
 	GLuint arrowShaderV;
+
+	//! The OpenGL id for the vertex shader for the arrow plot with scaling.
+	GLuint arrowShaderVScale;
 
 	//! The OpenGL id for the fragment shader for the arrow plot.
 	GLuint arrowShaderF;
 
-	//! The OpenGL id for the arrow plot shader program.
+	//! The OpenGL id for the arrow plot shader program without scaling.
 	GLuint arrowProgram;
+
+	//! The OpenGL id for the arrow plot shader program with scaling.
+	GLuint arrowScaleProgram;
 
 	//! The OpenGL id for the arrow sprite texture.
 	GLuint sprite;

@@ -3,18 +3,21 @@
 class Ball
 {
 public:
-	Ball(float x = 0, float y = 0, vec3 vel = vec3());
+	Ball(vec3 pos = vec3(), vec3 vel = vec3());
+	Ball(float x, float y, float velX = 0, float velY = 0);
 	~Ball(void);
+	vec3 pos();
 	float x();
 	float y();
+	void setPos(vec3 pos);
 	void setPos(float x, float y);
 	void draw();
 	void update();
 	void update(vec3 vel);
+	vec3 proposeMove();
 
 private:
-	float _x;
-	float _y;
+	vec3 _pos;
 	vec3 _vel;
 };
 

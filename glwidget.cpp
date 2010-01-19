@@ -25,7 +25,6 @@ GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
 
 	ball = Ball(290, 260);
 
-	numArrows = 20;
 	numLines = 20;
 	stepSize = 0.25;
 	numSteps = 200;
@@ -85,6 +84,16 @@ void GLWidget::toggleArrowPlot(bool enabled)
 	arrowPlot = enabled;
 }
 
+void GLWidget::toggleArrowScale(bool enabled)
+{
+	arrowScale = enabled;
+}
+
+void GLWidget::setNumArrows(int num)
+{
+	numArrows = num;
+}
+
 void GLWidget::toggleStreamlines(bool enabled)
 {
 	streamlines = enabled;
@@ -93,6 +102,21 @@ void GLWidget::toggleStreamlines(bool enabled)
 void GLWidget::setRK(bool enabled)
 {
 	rk = enabled;
+}
+
+void GLWidget::setNumLines(int num)
+{
+	numLines = num;
+}
+
+void GLWidget::setNumSteps(int num)
+{
+	numSteps = num;
+}
+
+void GLWidget::setStepSize(float step)
+{
+	stepSize = step;
 }
 
 void GLWidget::togglePong(bool enabled)
@@ -189,27 +213,32 @@ void GLWidget::setShaders(void)
 	vertexShader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
 	fragmentShader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER);
 	arrowShaderV = glCreateShaderObjectARB(GL_VERTEX_SHADER);
+	arrowShaderVScale = glCreateShaderObjectARB(GL_VERTEX_SHADER);
 	arrowShaderF = glCreateShaderObjectARB(GL_FRAGMENT_SHADER);
 	check_gl_error("create shaders");
 
 	GLcharARB* fragmentSource;
 	GLcharARB* vertexSource;
 	GLcharARB* arrowSourceV;
+	GLcharARB* arrowSourceVScale;
 	GLcharARB* arrowSourceF;
 
 	vertexSource = readShader("GLSL/color.vert");
 	fragmentSource = readShader("GLSL/color.frag");
 	arrowSourceV = readShader("GLSL/arrow.vert");
+	arrowSourceVScale = readShader("GLSL/arrowScale.vert");
 	arrowSourceF = readShader("GLSL/arrow.frag");
 
 	glShaderSource(fragmentShader, 1, const_cast<const GLchar**>(&fragmentSource), 0);
 	glShaderSource(vertexShader, 1, const_cast<const GLchar**>(&vertexSource), 0);
 	glShaderSource(arrowShaderV, 1, const_cast<const GLchar**>(&arrowSourceV), 0);
+	glShaderSource(arrowShaderVScale, 1, const_cast<const GLchar**>(&arrowSourceVScale), 0);
 	glShaderSource(arrowShaderF, 1, const_cast<const GLchar**>(&arrowSourceF), 0);
 
 	glCompileShader(vertexShader);
 	glCompileShader(fragmentShader);
 	glCompileShader(arrowShaderV);
+	glCompileShader(arrowShaderVScale);
 	glCompileShader(arrowShaderF);
 	check_gl_error("compile shaders");
 
@@ -227,6 +256,14 @@ void GLWidget::setShaders(void)
 	glAttachShader(arrowProgram, arrowShaderF);
 	check_gl_error("attach shaders");
 	glLinkProgram(arrowProgram);
+	check_gl_error("link program");
+
+	arrowScaleProgram = glCreateProgram();
+	check_gl_error("create program");
+	glAttachShader(arrowScaleProgram, arrowShaderVScale);
+	glAttachShader(arrowScaleProgram, arrowShaderF);
+	check_gl_error("attach shaders");
+	glLinkProgram(arrowScaleProgram);
 	check_gl_error("link program");
 
 	GLint compiledv, compiledf, linked;
@@ -248,31 +285,30 @@ void GLWidget::setShaders(void)
 	GLint len;
 	glGetShaderInfoLog(vertexShader, 40960, &len, log); 
 	//qDebug() << log;
-	std::cout << log << std::endl;
 
 	glGetShaderInfoLog(fragmentShader, 40960, &len, log); 
 	//qDebug() << log;
-	std::cout << log << std::endl;
 
 	glGetShaderiv(arrowShaderV, GL_COMPILE_STATUS, &compiledv);
 	glGetShaderiv(arrowShaderF, GL_COMPILE_STATUS, &compiledf);
 
 	glGetProgramiv(arrowProgram, GL_LINK_STATUS, &linked);
 
-	if (!compiledv)
+	//if (!compiledv)
 		//qDebug() << "vertex shader not compiled";
-	if (!compiledf)
+	//if (!compiledf)
 		//qDebug() << "fragment shader not compiled";
 
-	if (!linked)
+	//if (!linked)
 		//qDebug() << "not linked ";
 
 	glGetShaderInfoLog(arrowShaderV, 40960, &len, log); 
-	std::cout << log << std::endl;
+	//qDebug() << log;
+
+	glGetShaderInfoLog(arrowShaderVScale, 40960, &len, log); 
 	//qDebug() << log;
 
 	glGetShaderInfoLog(arrowShaderF, 40960, &len, log); 
-	std::cout << log << std::endl;
 	//qDebug() << log;
 
 	glUseProgram(gridProgram);
@@ -448,20 +484,28 @@ void GLWidget::paintGL()
 
 void GLWidget::drawArrows()
 {
-	glUseProgram(arrowProgram);
+	int program;
+	float maxSize = min(width(), height())/numArrows;
+
+	if(arrowScale)
+		program = arrowScaleProgram;
+	else
+		program = arrowProgram;
+
+	glUseProgram(program);
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, velocityTexture);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, sprite);
 
-	glUniform1i(glGetUniformLocation(arrowProgram, "arrow"), 0);
-	glUniform1i(glGetUniformLocation(arrowProgram, "velocity"), 1);
+	glUniform1i(glGetUniformLocation(program, "arrow"), 0);
+	glUniform1i(glGetUniformLocation(program, "velocity"), 1);
+	glUniform1f(glGetUniformLocation(program, "maxSize"), maxSize);
 
 	glEnable(GL_POINT_SPRITE);
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 	glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-	glPointSize(min(width(), height())/40);
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	glBegin(GL_POINTS);
@@ -543,8 +587,6 @@ void GLWidget::rungeKutta(float *x, float *y, float *tex)
 
 void GLWidget::updatePong()
 {
-	float x, y;
-
 	int index = ((int)ball.x() + (int)ball.y() * geometry->getDimX()) * 3;
 	if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
 		ball.update(vec3(velocity[index + 1], velocity[index]));

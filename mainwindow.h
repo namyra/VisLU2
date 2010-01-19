@@ -40,14 +40,22 @@ private:
 	//! The widget displaying the actual render of the volume data.
     GLWidget *glWidget;
 
+	//! The widget group for all arrow plot options.
+	QGroupBox *arrowGroup;
+
 	//! The checkbox that enables/disables the arrow plot.
 	QCheckBox *checkArrowPlot;
 
+	QLabel *labelNumArrows;
+	QSpinBox *sbNumArrows;
+
+	QCheckBox *checkArrowScale;
+
+	//! The widget group for all streamline options.
+	QGroupBox *linesGroup;
+
 	//! The checkbox that enables/disables the streamlines.
 	QCheckBox *checkStreamlines;
-
-	//! The widget group for the buttons to switch between Euler and Runge-Kutta algorithms.
-	QGroupBox *rkGroup;
 
 	//! The button group for the buttons to switch between Euler and Runge-Kutta algorithms.
     QButtonGroup *rkButtons;
@@ -57,6 +65,18 @@ private:
 
 	//! The button that switches to Runge-Kutta algorithm.
 	QRadioButton *rkButton;
+
+	QLabel *labelNumLines;
+	QSpinBox *sbNumLines;
+
+	QLabel *labelNumSteps;
+	QSpinBox *sbNumSteps;
+
+	QLabel *labelStepSize;
+	QDoubleSpinBox *sbStepSize;
+
+	//! The widget group for all pong options.
+	QGroupBox *pongGroup;
 
 	//! The button to reset the pong game.
 	QPushButton *resetButton;

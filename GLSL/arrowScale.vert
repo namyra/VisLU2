@@ -12,5 +12,5 @@ void main()
 	rot = mat2(cos, -sin, sin, cos);
 	gl_TexCoord[0] = gl_MultiTexCoord0;
 	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-	gl_PointSize = maxSize;
+	gl_PointSize = 	max(maxSize/4, min(maxSize, vel.z * maxSize/10));
 }
