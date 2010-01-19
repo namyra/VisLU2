@@ -9,6 +9,7 @@
 
 #include <qapplication.h>
 #include <qtimer.h>
+#include <QMouseEvent>
 
 #include <QDebug>
 
@@ -30,6 +31,9 @@ GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
 	numSteps = 200;
 	pong = true;
 	paused = true;
+
+	setCursor(QCursor(Qt::BlankCursor));
+	setMouseTracking(true);
 
 	tf = new TFTexture(this);
 
@@ -589,13 +593,14 @@ void GLWidget::updatePong()
 {
 	int index = ((int)ball.x() + (int)ball.y() * geometry->getDimX()) * 3;
 	if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
-		ball.update(vec3(velocity[index + 1], velocity[index]));
+		ball.update(vec3(velocity[index + 1], velocity[index]), player.pos(), player.mode());
 	else
 		ball.update();
 }
 
 void GLWidget::drawPong()
 {
+	player.draw();
 	ball.draw();
 }
 
@@ -607,6 +612,35 @@ void GLWidget::timeOut()
 void GLWidget::timeOutSlot()
 {
     timeOut();
+}
+
+void GLWidget::mouseMoveEvent(QMouseEvent *event)
+{
+	if(paused)
+		event->ignore();
+
+	player.setPos(event->x(), event->y());
+}
+
+void GLWidget::mousePressEvent(QMouseEvent *event)
+{
+	if(paused)
+		event->ignore();
+
+	if(event->button() == Qt::LeftButton)
+		player.setMode(PONG_ATTRACTION);
+
+	if(event->button() == Qt::RightButton)
+		player.setMode(PONG_REPULSION);
+}
+
+void GLWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+	if(paused)
+		event->ignore();
+
+	if(event->buttons() == Qt::NoButton)
+		player.setMode(PONG_NEUTRAL);
 }
 
 const int GLWidget::GetNextPowerOfTwo(const int iNumber)

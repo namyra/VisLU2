@@ -65,9 +65,23 @@ void Ball::update()
 	_pos = proposeMove();
 }
 
-void Ball::update(vec3 vel)
+void Ball::update(vec3 vel, vec3 playerPos, PongMode mode)
 {
-	_vel = _vel/2 + vel/2;
+	if(mode == PONG_ATTRACTION)
+	{
+		vec3 attraction = playerPos - _pos;
+		_vel = _vel/3 + vel/3 + !attraction/attraction.length() * 100;
+	}
+	else if(mode == PONG_REPULSION)
+	{
+		vec3 repulsion = _pos - playerPos;
+		_vel = _vel/3 + vel/3 + !repulsion/repulsion.length() * 100;
+	}
+	else if(mode == PONG_NEUTRAL)
+	{
+		_vel = _vel/2 + vel/2;
+	}
+
 	_pos = proposeMove();
 }
 

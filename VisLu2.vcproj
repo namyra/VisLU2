@@ -94,6 +94,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Player.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\textfile.cpp"
 				>
 			</File>
@@ -145,6 +149,10 @@
 			</File>
 			<File
 				RelativePath=".\mainwindow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Player.h"
 				>
 			</File>
 			<File

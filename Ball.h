@@ -1,4 +1,5 @@
 #include "vec3.h"
+#include "Player.h"
 
 class Ball
 {
@@ -13,7 +14,7 @@ public:
 	void setPos(float x, float y);
 	void draw();
 	void update();
-	void update(vec3 vel);
+	void update(vec3 vel, vec3 playerPos, PongMode mode);
 	vec3 proposeMove();
 
 private:

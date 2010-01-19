@@ -14,6 +14,7 @@
 #include "FlowData.h"
 #include "TFTexture.h"
 #include "Ball.h"
+#include "Player.h"
 
 //! Display widget for the volume dataset.
 /*!
@@ -116,6 +117,12 @@ protected:
 	*/
     void timeOut();
 
+	void mouseMoveEvent(QMouseEvent *event);
+
+	void mousePressEvent(QMouseEvent *event);
+
+	void mouseReleaseEvent(QMouseEvent *event);
+
 protected slots:
 
 	//! Slot for the peroidic timer signal.
@@ -145,6 +152,7 @@ private:
 	bool pong;
 
 	bool paused;
+	Player player;
 	Ball ball;
 
 	//! The flow data.

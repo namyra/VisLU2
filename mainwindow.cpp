@@ -23,10 +23,10 @@ MainWindow::MainWindow()
 	connect(checkArrowScale, SIGNAL(toggled(bool)), glWidget, SLOT(toggleArrowScale(bool)));
 	checkArrowScale->setChecked(true);
 
+	labelNumArrows = new QLabel("Number of Arrows");
 	sbNumArrows = new QSpinBox();
 	sbNumArrows->setMinimum(10);
 	sbNumArrows->setMaximum(50);
-	labelNumArrows = new QLabel("Number of Arrows");
     connect(sbNumArrows, SIGNAL(valueChanged(int)), glWidget, SLOT(setNumArrows(int)));
 	sbNumArrows->setValue(20);
 
@@ -50,26 +50,26 @@ MainWindow::MainWindow()
 	connect(rkButton, SIGNAL(toggled(bool)), glWidget, SLOT(setRK(bool)));
     rkButton->setChecked(true);
 
+	labelNumLines = new QLabel("Number of Streamlines");
 	sbNumLines = new QSpinBox();
 	sbNumLines->setMinimum(10);
 	sbNumLines->setMaximum(50);
-	labelNumLines = new QLabel("Number of Streamlines");
     connect(sbNumLines, SIGNAL(valueChanged(int)), glWidget, SLOT(setNumLines(int)));
 	sbNumLines->setValue(20);
 
+	labelNumSteps = new QLabel("Number of Steps");
 	sbNumSteps = new QSpinBox();
 	sbNumSteps->setMinimum(50);
 	sbNumSteps->setMaximum(5000);
 	sbNumSteps->setSingleStep(10);
-	labelNumSteps = new QLabel("Number of Steps");
     connect(sbNumSteps, SIGNAL(valueChanged(int)), glWidget, SLOT(setNumSteps(int)));
 	sbNumSteps->setValue(200);
 
+	labelStepSize = new QLabel("Step Size");
 	sbStepSize = new QDoubleSpinBox();
 	sbStepSize->setMinimum(0.01);
 	sbStepSize->setMaximum(1);
 	sbNumSteps->setSingleStep(0.05);
-	labelStepSize = new QLabel("Step Size");
     connect(sbStepSize, SIGNAL(valueChanged(float)), glWidget, SLOT(setStepSize(float)));
 	sbStepSize->setValue(0.25);
 
@@ -86,7 +86,7 @@ MainWindow::MainWindow()
     linesGroupLayout->addWidget(sbStepSize, 5, 2);
     linesGroup->setLayout(linesGroupLayout);
 
-	pauseButton = new QPushButton("Pause", widget);
+	pauseButton = new QPushButton("&Pause", widget);
 	connect(pauseButton, SIGNAL(clicked()), glWidget, SLOT(pausePong()));
 
 	resetButton = new QPushButton("Reset", widget);
