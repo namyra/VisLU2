@@ -101,18 +101,24 @@ MainWindow::MainWindow()
 	transferScene = new QGraphicsScene;
 	transferView = new TFView(transferScene, glWidget->transferFunction());
 	transferView->show();
-	transferView->setMaximumHeight(150);
+	transferView->setMinimumHeight(100);
+	transferView->setMaximumHeight(100);
 
 	clearButton = new QPushButton("Clear", widget);
 	connect(clearButton, SIGNAL(clicked()), transferView, SLOT(clearTF()));
+
+	tfGroup = new QGroupBox("Transfer Function");
+    QVBoxLayout *tfGroupLayout = new QVBoxLayout;
+	tfGroupLayout->addWidget(transferView);
+	tfGroupLayout->addWidget(clearButton);
+	tfGroup->setLayout(tfGroupLayout);
 
 	sideBar = new QGroupBox;
     QVBoxLayout *sideBarLayout = new QVBoxLayout;
 	sideBarLayout->addWidget(arrowGroup);
 	sideBarLayout->addWidget(linesGroup);
 	sideBarLayout->addWidget(pongGroup);
-	sideBarLayout->addWidget(transferView);
-	sideBarLayout->addWidget(clearButton);
+	sideBarLayout->addWidget(tfGroup);
     sideBarLayout->insertStretch(0);
     sideBar->setFixedWidth(300);
     sideBar->setLayout(sideBarLayout);

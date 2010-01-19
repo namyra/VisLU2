@@ -84,6 +84,9 @@ private:
 	//! The button to pause the pong game.
 	QPushButton *pauseButton;
 
+	//! The widget group for all transfer function options.
+	QGroupBox *tfGroup;
+
 	//! The Qt scene used to display the transfer function.
 	QGraphicsScene *transferScene;
 
