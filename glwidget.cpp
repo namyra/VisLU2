@@ -600,6 +600,7 @@ void GLWidget::updatePong()
 
 void GLWidget::drawPong()
 {
+	glUseProgram(0);
 	player.draw();
 	ball.draw();
 }
@@ -618,29 +619,35 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
 	if(paused)
 		event->ignore();
-
-	player.setPos(event->x(), event->y());
+	else
+	{
+		player.setPos(event->x(), event->y());
+	}
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
 {
 	if(paused)
 		event->ignore();
+	else
+	{
+		if(event->button() == Qt::LeftButton)
+			player.setMode(PONG_ATTRACTION);
 
-	if(event->button() == Qt::LeftButton)
-		player.setMode(PONG_ATTRACTION);
-
-	if(event->button() == Qt::RightButton)
-		player.setMode(PONG_REPULSION);
+		if(event->button() == Qt::RightButton)
+			player.setMode(PONG_REPULSION);
+	}
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
 	if(paused)
 		event->ignore();
-
-	if(event->buttons() == Qt::NoButton)
-		player.setMode(PONG_NEUTRAL);
+	else
+	{
+		if(event->buttons() == Qt::NoButton)
+			player.setMode(PONG_NEUTRAL);
+	}
 }
 
 const int GLWidget::GetNextPowerOfTwo(const int iNumber)
