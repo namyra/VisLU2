@@ -18,7 +18,9 @@ class FlowChannel{
         ///maximum value (of all cells in a single time step)
         float maximum;
     public:
+		///constructor using a given geometry structure
         FlowChannel(FlowGeometry* g);
+		///destructor
         ~FlowChannel();
         ///sets the value of the given vertex
         void setValue(int vtxID, float val);
@@ -50,6 +52,7 @@ class FlowChannel{
 		///returns the range = max - min
 		float getRange();
 
+		///returns the raw values for a given channel
 		float getRawValue(int i);
 };
 #endif

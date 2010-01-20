@@ -1,7 +1,7 @@
 /*! \file glwidget.cpp
 	\brief GLWidget source file.
 
-	Contains the source code for the GLWidget class, which is the main display widget, showing the slices/volume renders.
+	Contains the source code for the GLWidget class, which is the main display widget, showing the different flow visualisation options.
 */
 
 #include "glwidget.h"
@@ -9,8 +9,10 @@
 
 #include <qapplication.h>
 #include <qtimer.h>
-
+#include <QMouseEvent>
 #include <QDebug>
+#include <QDoubleSpinBox>
+#include <QSpinBox>
 
 GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
 {
@@ -23,14 +25,9 @@ GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
         timer->start(timerInterval);
     }
 
+	pong = false;
 	ball = Ball(290, 260);
-
-	numArrows = 20;
-	numLines = 20;
-	stepSize = 0.25;
-	numSteps = 200;
-	pong = true;
-	paused = true;
+	paused = false;
 
 	tf = new TFTexture(this);
 
@@ -85,6 +82,16 @@ void GLWidget::toggleArrowPlot(bool enabled)
 	arrowPlot = enabled;
 }
 
+void GLWidget::toggleArrowScale(bool enabled)
+{
+	arrowScale = enabled;
+}
+
+void GLWidget::setNumArrows(int num)
+{
+	numArrows = num;
+}
+
 void GLWidget::toggleStreamlines(bool enabled)
 {
 	streamlines = enabled;
@@ -95,14 +102,66 @@ void GLWidget::setRK(bool enabled)
 	rk = enabled;
 }
 
+void GLWidget::setNumLines(int num)
+{
+	numLines = num;
+}
+
+void GLWidget::setNumSteps(int num)
+{
+	numSteps = num;
+
+	if(lockedSteps)
+	{
+		stepSize = min(50.0/(float)num, 1.0);
+		QDoubleSpinBox* spinBox = qFindChild<QDoubleSpinBox *>(parent(), "stepSizeBox");
+		if(spinBox != 0)
+			spinBox->setValue(stepSize);
+		else
+			qDebug() << "Spin Box not found";
+	}
+}
+
+void GLWidget::setStepSize(double step)
+{
+	stepSize = step;
+
+	if(lockedSteps)
+	{
+		numSteps = 50/stepSize;
+		QSpinBox* spinBox = qFindChild<QSpinBox *>(parent(), "numStepBox");
+		if(spinBox != 0)
+			spinBox->setValue(numSteps);
+		else
+			qDebug() << "Spin Box not found";
+	}
+}
+
+void GLWidget::lockStepSize(bool enabled)
+{
+	lockedSteps = enabled;
+}
+
 void GLWidget::togglePong(bool enabled)
 {
 	pong = enabled;
+
+	if(pong)
+	{
+		setCursor(QCursor(Qt::BlankCursor));
+		setMouseTracking(true);
+	}
+	else
+	{
+		setCursor(QCursor(Qt::ArrowCursor));
+		setMouseTracking(false);
+	}
 }
 
 void GLWidget::resetPong()
 {
 	ball.setPos(rand() % width(), rand() % height());
+	ball.setVel();
 }
 
 void GLWidget::pausePong()
@@ -189,27 +248,32 @@ void GLWidget::setShaders(void)
 	vertexShader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
 	fragmentShader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER);
 	arrowShaderV = glCreateShaderObjectARB(GL_VERTEX_SHADER);
+	arrowShaderVScale = glCreateShaderObjectARB(GL_VERTEX_SHADER);
 	arrowShaderF = glCreateShaderObjectARB(GL_FRAGMENT_SHADER);
 	check_gl_error("create shaders");
 
 	GLcharARB* fragmentSource;
 	GLcharARB* vertexSource;
 	GLcharARB* arrowSourceV;
+	GLcharARB* arrowSourceVScale;
 	GLcharARB* arrowSourceF;
 
 	vertexSource = readShader("GLSL/color.vert");
 	fragmentSource = readShader("GLSL/color.frag");
 	arrowSourceV = readShader("GLSL/arrow.vert");
+	arrowSourceVScale = readShader("GLSL/arrowScale.vert");
 	arrowSourceF = readShader("GLSL/arrow.frag");
 
 	glShaderSource(fragmentShader, 1, const_cast<const GLchar**>(&fragmentSource), 0);
 	glShaderSource(vertexShader, 1, const_cast<const GLchar**>(&vertexSource), 0);
 	glShaderSource(arrowShaderV, 1, const_cast<const GLchar**>(&arrowSourceV), 0);
+	glShaderSource(arrowShaderVScale, 1, const_cast<const GLchar**>(&arrowSourceVScale), 0);
 	glShaderSource(arrowShaderF, 1, const_cast<const GLchar**>(&arrowSourceF), 0);
 
 	glCompileShader(vertexShader);
 	glCompileShader(fragmentShader);
 	glCompileShader(arrowShaderV);
+	glCompileShader(arrowShaderVScale);
 	glCompileShader(arrowShaderF);
 	check_gl_error("compile shaders");
 
@@ -227,6 +291,14 @@ void GLWidget::setShaders(void)
 	glAttachShader(arrowProgram, arrowShaderF);
 	check_gl_error("attach shaders");
 	glLinkProgram(arrowProgram);
+	check_gl_error("link program");
+
+	arrowScaleProgram = glCreateProgram();
+	check_gl_error("create program");
+	glAttachShader(arrowScaleProgram, arrowShaderVScale);
+	glAttachShader(arrowScaleProgram, arrowShaderF);
+	check_gl_error("attach shaders");
+	glLinkProgram(arrowScaleProgram);
 	check_gl_error("link program");
 
 	GLint compiledv, compiledf, linked;
@@ -337,7 +409,7 @@ void GLWidget::initializeGL()
 	ILuint spriteImage;
 	ilGenImages(1, &spriteImage);
 	ilBindImage(spriteImage);
-	ilLoadImage("textures/arrow.gif");
+	ilLoadImage("textures/arrow.png");
 	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 	
 	glGenTextures(1, &sprite);
@@ -351,6 +423,9 @@ void GLWidget::initializeGL()
 	ilDeleteImages(1, &spriteImage);
 
 	setShaders();
+
+	glEnable(GL_LINE_SMOOTH);
+	//glLineWidth(1.5);
 }
 
 void GLWidget::resizeGL(int width, int height)
@@ -378,21 +453,16 @@ void GLWidget::paintGL()
 	glLoadIdentity();
 	glViewport(0, 0, float(width()), float(height()));
 	glOrtho(0.0f,width(),height(),0.0f,-1.0f,1.0f);	
-	//if (!isFlipped) {
 	glScalef(1, -1, 1);
 	glTranslatef(0, -height(), 0);
-	//}
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	if (!isFlipped) {
-		glScalef(1, -1, 1);
-		glTranslatef(0, -height(), 0);
-	}
+	glScalef(1, -1, 1);
+	glTranslatef(0, -height(), 0);
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	//check_gl_error("test");
 	if (init) {
 
 		glColor3f(1, 1, 1);
@@ -402,7 +472,6 @@ void GLWidget::paintGL()
 		glEnable(GL_TEXTURE_RECTANGLE_ARB);
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
-		//glEnable(GL_TEXTURE_1D);
 		
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gridTexture);
@@ -415,52 +484,43 @@ void GLWidget::paintGL()
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, inverseGridYTexture);
 
-		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_grid"), 0);
-		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_channel3"), 1);
-		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_transfer"), 2);
-		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_inverseX"), 3);
-		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_inverseY"), 4);
-		glUniform1iARB(glGetUniformLocation(gridProgram, "flipped"), isFlipped);
-		glUniform1fARB(glGetUniformLocation(gridProgram, "width"), float(geometry->getDimX()));
-		glUniform1fARB(glGetUniformLocation(gridProgram, "height"), float(geometry->getDimY()));
+		float ratio = float(height()) / float(geometry->getDimY());
 
-/*
-		glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex2f(0,0);
-		glTexCoord2f(1, 0.0f);
-		glVertex2f(width(),0);
-		glTexCoord2f(1, 1);
-		glVertex2f(width(),height());
-		glTexCoord2f(0.0f, 1);
-		glVertex2f(0,height());
-		glEnd();
-*/
+		glUniform1i(glGetUniformLocation(gridProgram, "tex_grid"), 0);
+		glUniform1i(glGetUniformLocation(gridProgram, "tex_channel3"), 1);
+		glUniform1i(glGetUniformLocation(gridProgram, "tex_transfer"), 2);
+		glUniform1i(glGetUniformLocation(gridProgram, "tex_inverseX"), 3);
+		glUniform1i(glGetUniformLocation(gridProgram, "tex_inverseY"), 4);
+		glUniform1i(glGetUniformLocation(gridProgram, "flipped"), isFlipped);
+		glUniform1f(glGetUniformLocation(gridProgram, "width"), float(geometry->getDimX()));
+		glUniform1f(glGetUniformLocation(gridProgram, "height"), float(geometry->getDimY()));
 
-		glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex2f(0,0);
-		glTexCoord2f(geometry->getDimX(), 0.0f);
-		glVertex2f(geometry->getDimX(),0);
-		glTexCoord2f(geometry->getDimX(), geometry->getDimY());
-		glVertex2f(geometry->getDimX(),geometry->getDimY());
-		glTexCoord2f(0.0f, geometry->getDimY());
-		glVertex2f(0,geometry->getDimY());
-		glEnd();
+		if (!isFlipped) {
+			glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 0.0f);
+			glVertex2f(0,0);
+			glTexCoord2f(geometry->getDimX(), 0.0f);
+			glVertex2f(geometry->getDimX(),0);
+			glTexCoord2f(geometry->getDimX(), geometry->getDimY());
+			glVertex2f(geometry->getDimX(),geometry->getDimY());
+			glTexCoord2f(0.0f, geometry->getDimY());
+			glVertex2f(0,geometry->getDimY());
+			glEnd();
+		} else {
+			glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, geometry->getDimY());
+			glVertex2f(0,0);
+			glTexCoord2f(geometry->getDimX(), geometry->getDimY());
+			glVertex2f(geometry->getDimX(),0);
+			glTexCoord2f(geometry->getDimX(), 0.0f);
+			glVertex2f(geometry->getDimX(),geometry->getDimY());
+			glTexCoord2f(0.0f, 0.0f);
+			glVertex2f(0,geometry->getDimY());
+			glEnd();
+		}
 
 		glUseProgram(0);
-/*
-		glBegin(GL_QUADS);
-			glTexCoord2f(0.0f, 0.0f);
-			glVertex3f(0,0,-0.8);
-			glTexCoord2f(314, 0.0f);
-			glVertex3f(width(),0,-0.8);
-			glTexCoord2f(314, 538);
-			glVertex3f(width(),height(),-0.8);
-			glTexCoord2f(0.0f, 538);
-			glVertex3f(0,height(),-0.8);
-		glEnd();
-*/
+
 		if(pong)
 		{
 			if(!paused)
@@ -468,6 +528,9 @@ void GLWidget::paintGL()
 
 			drawPong();
 		}
+
+		if (!initVelocity)
+			initializeVelocity();
 
 		if(streamlines)
 			drawStreamlines();
@@ -480,20 +543,29 @@ void GLWidget::paintGL()
 
 void GLWidget::drawArrows()
 {
-	glUseProgram(arrowProgram);
+	int program;
+	float maxSize = min(geometry->getDimX(), geometry->getDimY())/numArrows;
+
+	if(arrowScale)
+		program = arrowScaleProgram;
+	else
+		program = arrowProgram;
+
+	glUseProgram(program);
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, velocityTexture);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, sprite);
 
-	glUniform1i(glGetUniformLocation(arrowProgram, "arrow"), 0);
-	glUniform1i(glGetUniformLocation(arrowProgram, "velocity"), 1);
+	glUniform1i(glGetUniformLocation(program, "arrow"), 0);
+	glUniform1i(glGetUniformLocation(program, "velocity"), 1);
+	glUniform1f(glGetUniformLocation(program, "maxSize"), maxSize);
+	glUniform1i(glGetUniformLocation(program, "flipped"), isFlipped);
 
 	glEnable(GL_POINT_SPRITE);
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 	glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-	glPointSize(min(width(), height())/40);
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	glBegin(GL_POINTS);
@@ -501,7 +573,7 @@ void GLWidget::drawArrows()
 	{
 		for(int j = 1; j <= numArrows; j++)
 		{
-			glVertex2f(i/(float)(numArrows + 1) * width(), j/(float)(numArrows + 1) * height());
+			glVertex2f(i/(float)(numArrows + 1) * geometry->getDimX(), j/(float)(numArrows + 1) * geometry->getDimY());
 		}
 	}
 	glEnd();
@@ -509,49 +581,60 @@ void GLWidget::drawArrows()
 
 void GLWidget::drawStreamlines()
 {
-	glUseProgram(0);
+	float x, y, mag;
+	int index;
 
-	glColor3f(0, 0, 0);
-	float x, y;
+	glUseProgram(0);
 
 	for(int i = 1; i <= numLines; i++)
 	{
 		for(int j = 1; j <= numLines; j++)
 		{
-			x = i/(float)(numLines + 1) * width();
-			y = j/(float)(numLines + 1) * height();
+			x = i/(float)(numLines + 1) * geometry->getDimX();
+			y = j/(float)(numLines + 1) * geometry->getDimY();
 
 			glBegin(GL_LINE_STRIP);
 
-			for(int k = 0; k < numSteps; k++)
+			for(int k = 0; k <= numSteps; k++)
 			{
+				index = ((int)x + (int)y * geometry->getDimX()) * 3;
+				if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
+					mag = velocity[index + 2]/dataset->getChannel(vel)->getMax();
+
+				glColor3f(0.6666 + mag/1.5, 0.5 + mag/2.0, 0.6666 + mag/1.5);
+				//glColor3f(mag, 0.0, 0.0);
 				glVertex2f(x, y);
 				if(rk)
-					rungeKutta(&x, &y, velocity);
+					rungeKutta(&x, &y);
 				else
-					euler(&x, &y, velocity);
+					euler(&x, &y);
 			}
 
 			glEnd();
 		}
 	}
 }
-void GLWidget::euler(float *x, float *y, float *tex)
+void GLWidget::euler(float *x, float *y)
 {
-	float nextX, nextY;
+	float nextX, nextY, nextMag;
 	int index;
 
 	index = ((int)*x + (int)*y * geometry->getDimX()) * 3;
 	if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
 	{
-		nextX = *x + stepSize * tex[index + 1];
-		nextY = *y + stepSize * tex[index];
+		if (!isFlipped) {
+			nextX = *x + stepSize * velocity[index];
+			nextY = *y + stepSize * velocity[index + 1];
+		} else {
+			nextX = *x + stepSize * velocity[index + 1];
+			nextY = *y + stepSize * velocity[index];
+		}
 		*x = nextX;
 		*y = nextY;
 	}
 }
 
-void GLWidget::rungeKutta(float *x, float *y, float *tex)
+void GLWidget::rungeKutta(float *x, float *y)
 {
 	float tmpX, nextX, tmpY, nextY;
 	int index;
@@ -559,14 +642,19 @@ void GLWidget::rungeKutta(float *x, float *y, float *tex)
 	index = ((int)*x + (int)*y * geometry->getDimX()) * 3;
 	if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
 	{
-		tmpX = *x + stepSize * tex[index + 1] / 2.0;
-		tmpY = *y + stepSize * tex[index] / 2.0;
+		tmpX = *x + stepSize * velocity[index + 1] / 2.0;
+		tmpY = *y + stepSize * velocity[index] / 2.0;
 
 		index = ((int)tmpX + (int)tmpY * geometry->getDimX()) * 3;
 		if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
 		{
-			nextX = *x + stepSize * tex[index + 1];
-			nextY = *y + stepSize * tex[index];
+			if (!isFlipped) {
+				nextX = *x + stepSize * velocity[index];
+				nextY = *y + stepSize * velocity[index + 1];
+			} else {
+				nextX = *x + stepSize * velocity[index + 1];
+				nextY = *y + stepSize * velocity[index];
+			}
 			*x = nextX;
 			*y = nextY;
 		}
@@ -575,17 +663,20 @@ void GLWidget::rungeKutta(float *x, float *y, float *tex)
 
 void GLWidget::updatePong()
 {
-	float x, y;
-
 	int index = ((int)ball.x() + (int)ball.y() * geometry->getDimX()) * 3;
-	if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
-		ball.update(vec3(velocity[index + 1], velocity[index]));
-	else
+	if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3) {
+		if (isFlipped)
+			ball.update(vec3(velocity[index + 1], velocity[index]), player.pos(), player.mode());
+		else
+			ball.update(vec3(velocity[index], velocity[index + 1]), player.pos(), player.mode());
+	} else
 		ball.update();
 }
 
 void GLWidget::drawPong()
 {
+	glUseProgram(0);
+	player.draw();
 	ball.draw();
 }
 
@@ -597,6 +688,41 @@ void GLWidget::timeOut()
 void GLWidget::timeOutSlot()
 {
     timeOut();
+}
+
+void GLWidget::mouseMoveEvent(QMouseEvent *event)
+{
+	if(paused)
+		event->ignore();
+	else
+	{
+		player.setPos(event->x(), event->y());
+	}
+}
+
+void GLWidget::mousePressEvent(QMouseEvent *event)
+{
+	if(paused)
+		event->ignore();
+	else
+	{
+		if(event->button() == Qt::LeftButton)
+			player.setMode(PONG_ATTRACTION);
+
+		if(event->button() == Qt::RightButton)
+			player.setMode(PONG_REPULSION);
+	}
+}
+
+void GLWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+	if(paused)
+		event->ignore();
+	else
+	{
+		if(event->buttons() == Qt::NoButton)
+			player.setMode(PONG_NEUTRAL);
+	}
 }
 
 const int GLWidget::GetNextPowerOfTwo(const int iNumber)
@@ -716,8 +842,6 @@ void GLWidget::loadDataSet(std::string fileName)
 
 			inverseGridX[i] = prev + (target - geometry->geometryData[k+j][0]) * ((next-prev)/(geometry->geometryData[0+j][0] - geometry->geometryData[k+j][0]));
 			inverseGridX[i] /= geometry->getDimX();
-			//qDebug() << "index: " << prev;
-			//qDebug() << "value: " << inverseGridX[i];
 		}
 		for (int i = 1; i < geometry->getDimY() - 1; i++) {
 			j = 0;
@@ -736,16 +860,13 @@ void GLWidget::loadDataSet(std::string fileName)
 
 			inverseGridY[i] = prev + (target - geometry->geometryData[k+j][1]) * ((next-prev)/(geometry->geometryData[0+j][1] - geometry->geometryData[k+j][1]));
 			inverseGridY[i] /= geometry->getDimY();
-			//qDebug() << "index: " << prev;
-			//qDebug() << "value: " << inverseGridY[i];
 		}
 	} else {
 		for (int i = 0; i < geometry->getDimX(); i++) {
-
 			inverseGridX[i] = float(i)/float(geometry->getDimX());
 		}
 		for (int i = 0; i < geometry->getDimY(); i++) {
-			inverseGridY[i] = float(i)/float(geometry->getDimY());
+			inverseGridY[i] = 1.0 - float(i)/float(geometry->getDimY());
 		}
 	}
 
@@ -762,4 +883,9 @@ void GLWidget::loadDataSet(std::string fileName)
 	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_LUMINANCE, geometry->getDimY(), 1, 0, GL_LUMINANCE, GL_FLOAT, inverseGridY);
 
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
+	initVelocity = false;
+}
+
+void GLWidget::initializeVelocity(void) {
+	initVelocity = true;
 }

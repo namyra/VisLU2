@@ -4,15 +4,19 @@
 #include <iostream>
 #include <math.h>
 
+///3-dimensional vector
 class vec3
 {
 public:
 	///our vector data
     float v[3];
-    //constructors
+    ///default constructor
     vec3();
+	///constructor taking 3 floats, one per coordinate
 	vec3(float x, float y, float z = 0.0f);
+	///constructor taking a float pointer pointing to an array containing the three coordinates
 	vec3(const float* u);
+	///copy constructor
 	vec3(const vec3&);
 	///returns an element of the vector
 	float& operator[](unsigned);

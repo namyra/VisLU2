@@ -65,6 +65,11 @@ public:
 	void clear();
 
 public slots:
+
+	//! Slot that clears the transfer function.
+	/*!
+		Clears the underlying transfer function, then redraws the scene.
+	*/
 	void clearTF();
 
 private:

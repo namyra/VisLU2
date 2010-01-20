@@ -23,7 +23,7 @@ public:
 	//! Default constructor.
 	/*!
 		Creates a new MainWindow and sets up the GUI for it.
-		\sa createSlider(), ~MainWindow()
+		\sa ~MainWindow()
 	*/
     MainWindow();
 
@@ -40,14 +40,26 @@ private:
 	//! The widget displaying the actual render of the volume data.
     GLWidget *glWidget;
 
+	//! The widget group for all arrow plot options.
+	QGroupBox *arrowGroup;
+
 	//! The checkbox that enables/disables the arrow plot.
 	QCheckBox *checkArrowPlot;
 
+	//! The label for the spinbox for the number of arrows in the arrow plot.
+	QLabel *labelNumArrows;
+
+	//! The spinbox for the number of arrows in the arrow plot.
+	QSpinBox *sbNumArrows;
+
+	//! The checkbox that enables/disables the scaling of arrows in the arrow plot.
+	QCheckBox *checkArrowScale;
+
+	//! The widget group for all streamline options.
+	QGroupBox *linesGroup;
+
 	//! The checkbox that enables/disables the streamlines.
 	QCheckBox *checkStreamlines;
-
-	//! The widget group for the buttons to switch between Euler and Runge-Kutta algorithms.
-	QGroupBox *rkGroup;
 
 	//! The button group for the buttons to switch between Euler and Runge-Kutta algorithms.
     QButtonGroup *rkButtons;
@@ -58,11 +70,41 @@ private:
 	//! The button that switches to Runge-Kutta algorithm.
 	QRadioButton *rkButton;
 
-	//! The button to reset the pong game.
+	//! The label for the spinbox for the number of streamlines.
+	QLabel *labelNumLines;
+
+	//! The spinbox for the number of streamlines.
+	QSpinBox *sbNumLines;
+
+	//! The label for the spinbox for the number of iteration steps for the streamlines.
+	QLabel *labelNumSteps;
+
+	//! The spinbox for the number of iteration steps for the streamlines.
+	QSpinBox *sbNumSteps;
+
+	//! The label for the spinbox for the size of each iteration step for the streamlines.
+	QLabel *labelStepSize;
+
+	//! The spinbox for the size of each iteration step for the streamlines.
+	QDoubleSpinBox *sbStepSize;
+
+	//! The checkbox that locks/unlocks the ratio of step size to number of steps.
+	QCheckBox *checkLockedSteps;
+
+	//! The widget group for all pong options.
+	QGroupBox *pongGroup;
+
+	//! The checkbox that enables/disables the Pong game.
+	QCheckBox *checkPong;
+
+	//! The button to reset the Pong game.
 	QPushButton *resetButton;
 
-	//! The button to pause the pong game.
+	//! The button to pause the Pong game.
 	QPushButton *pauseButton;
+
+	//! The widget group for all transfer function options.
+	QGroupBox *tfGroup;
 
 	//! The Qt scene used to display the transfer function.
 	QGraphicsScene *transferScene;
