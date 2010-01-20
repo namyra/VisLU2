@@ -42,7 +42,8 @@ bool FlowGeometry::readFromFile(char* header, FILE* fp, bool bigEndian)
         isFlipped = true;
         std::cout << "Flipped Y and X dimensions." << std::endl;
     }
-    else isFlipped = false;        
+    else isFlipped = false;  
+	qDebug() << "FLIPPED: " << isFlipped;
 
     std::cout << "X Boundaries: " << boundaryMin[0] << " ... " << boundaryMax[0] << std::endl;
     std::cout << "Y Boundaries: " << boundaryMin[1] << " ... " << boundaryMax[1] << std::endl;
@@ -53,8 +54,18 @@ bool FlowGeometry::readFromFile(char* header, FILE* fp, bool bigEndian)
 	qDebug() << "Y Boundaries - Max: " << boundaryMax[1];
 
 	for (int j = 0; j < getDimX()*getDimY(); j++) {
-		geometryData[j][0] = (geometryData[j].v[0] - boundaryMin.v[0]) / boundarySize.v[0];
-		geometryData[j][1] = (geometryData[j].v[1] - boundaryMin.v[1]) / boundarySize.v[1];
+		/*if (geometryData[j][0] < boundaryMin[0])
+			geometryData[j][0] = 0.0;
+		else if (geometryData[j][0] < boundaryMax[0])
+			geometryData[j][0] = 1.0;
+		else if (geometryData[j][1] < boundaryMin[1])
+			geometryData[j][1] = 0.0;
+		else if(geometryData[j][1] < boundaryMax[1])
+			geometryData[j][1] = 1.0;
+		else {*/
+			geometryData[j][0] = (geometryData[j][0] - boundaryMin[0]) / boundarySize[0];
+			geometryData[j][1] = (geometryData[j][1] - boundaryMin[1]) / boundarySize[1];
+		//}
 	}
 
 	return true;
@@ -239,4 +250,8 @@ vec3 FlowGeometry::unNormalizeCoords(vec3 pos)
 	u[1] *= boundarySize[1];
 
 	return u += boundaryMin;
+}
+
+bool FlowGeometry::getFlipped(void) {
+	return isFlipped;
 }

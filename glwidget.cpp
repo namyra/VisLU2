@@ -23,11 +23,14 @@ GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
         timer->start(timerInterval);
     }
 
-	ball = Ball(100, 100, 1, 1);
+	ball = Ball(290, 260);
 
-	arrowPlot = false;
-	streamlines = true;
-	pong = false;
+	numArrows = 20;
+	numLines = 20;
+	stepSize = 0.25;
+	numSteps = 200;
+	pong = true;
+	paused = true;
 
 	tf = new TFTexture(this);
 
@@ -35,7 +38,7 @@ GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
 
 	dataset = new FlowData();
 	//loadDataSet("dat\\c_block");
-	loadDataSet("dat\\hurricane_p_tc_singletime10");
+	loadDataSet("dat\\c_block");
 
 }
 
@@ -87,9 +90,24 @@ void GLWidget::toggleStreamlines(bool enabled)
 	streamlines = enabled;
 }
 
+void GLWidget::setRK(bool enabled)
+{
+	rk = enabled;
+}
+
 void GLWidget::togglePong(bool enabled)
 {
 	pong = enabled;
+}
+
+void GLWidget::resetPong()
+{
+	ball.setPos(rand() % width(), rand() % height());
+}
+
+void GLWidget::pausePong()
+{
+	paused = !paused;
 }
 
 char* GLWidget::readShader(char *fn) {
@@ -354,14 +372,23 @@ void GLWidget::paintGL()
 {
 	static bool init = false;
 
-	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glViewport(0, 0, float(width()), float(height()));
-	glOrtho(0.0f,width(),height(),0.0f,-1.0f,1.0f);				
+	glOrtho(0.0f,width(),height(),0.0f,-1.0f,1.0f);	
+	//if (!isFlipped) {
+	glScalef(1, -1, 1);
+	glTranslatef(0, -height(), 0);
+	//}
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	if (!isFlipped) {
+		glScalef(1, -1, 1);
+		glTranslatef(0, -height(), 0);
+	}
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
@@ -375,6 +402,7 @@ void GLWidget::paintGL()
 		glEnable(GL_TEXTURE_RECTANGLE_ARB);
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
+		//glEnable(GL_TEXTURE_1D);
 		
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gridTexture);
@@ -382,11 +410,21 @@ void GLWidget::paintGL()
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, channel3Texture);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, transferTexture);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, inverseGridXTexture);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, inverseGridYTexture);
 
 		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_grid"), 0);
 		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_channel3"), 1);
 		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_transfer"), 2);
+		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_inverseX"), 3);
+		glUniform1iARB(glGetUniformLocation(gridProgram, "tex_inverseY"), 4);
+		glUniform1iARB(glGetUniformLocation(gridProgram, "flipped"), isFlipped);
+		glUniform1fARB(glGetUniformLocation(gridProgram, "width"), float(geometry->getDimX()));
+		glUniform1fARB(glGetUniformLocation(gridProgram, "height"), float(geometry->getDimY()));
 
+/*
 		glBegin(GL_QUADS);
 		glTexCoord2f(0.0f, 0.0f);
 		glVertex2f(0,0);
@@ -397,9 +435,21 @@ void GLWidget::paintGL()
 		glTexCoord2f(0.0f, 1);
 		glVertex2f(0,height());
 		glEnd();
+*/
+
+		glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex2f(0,0);
+		glTexCoord2f(geometry->getDimX(), 0.0f);
+		glVertex2f(geometry->getDimX(),0);
+		glTexCoord2f(geometry->getDimX(), geometry->getDimY());
+		glVertex2f(geometry->getDimX(),geometry->getDimY());
+		glTexCoord2f(0.0f, geometry->getDimY());
+		glVertex2f(0,geometry->getDimY());
+		glEnd();
 
 		glUseProgram(0);
-
+/*
 		glBegin(GL_QUADS);
 			glTexCoord2f(0.0f, 0.0f);
 			glVertex3f(0,0,-0.8);
@@ -410,10 +460,12 @@ void GLWidget::paintGL()
 			glTexCoord2f(0.0f, 538);
 			glVertex3f(0,height(),-0.8);
 		glEnd();
-
+*/
 		if(pong)
 		{
-			updatePong();
+			if(!paused)
+				updatePong();
+
 			drawPong();
 		}
 
@@ -445,11 +497,11 @@ void GLWidget::drawArrows()
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	glBegin(GL_POINTS);
-	for(int i = 1; i < 20; i++)
+	for(int i = 1; i <= numArrows; i++)
 	{
-		for(int j = 1; j < 20; j++)
+		for(int j = 1; j <= numArrows; j++)
 		{
-			glVertex2f(i/20.0 * width(), j/20.0 * height());
+			glVertex2f(i/(float)(numArrows + 1) * width(), j/(float)(numArrows + 1) * height());
 		}
 	}
 	glEnd();
@@ -457,49 +509,79 @@ void GLWidget::drawArrows()
 
 void GLWidget::drawStreamlines()
 {
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, velocityTexture);
-	float* dat = (float*) malloc(sizeof(float) * geometry->getDimX() * geometry->getDimY() * 3);
-	glGetTexImage(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, GL_FLOAT, dat);
-
 	glUseProgram(0);
 
 	glColor3f(0, 0, 0);
-	float x, nextX, y, nextY;
-	int index;
+	float x, y;
 
-	for(int i = 1; i < 40; i++)
+	for(int i = 1; i <= numLines; i++)
 	{
-		for(int j = 1; j < 40; j++)
+		for(int j = 1; j <= numLines; j++)
 		{
-			x = i/40.0 * width();
-			y = j/40.0 * height();
+			x = i/(float)(numLines + 1) * width();
+			y = j/(float)(numLines + 1) * height();
 
 			glBegin(GL_LINE_STRIP);
 
-			for(int k = 1; k < 50; k++)
+			for(int k = 0; k < numSteps; k++)
 			{
 				glVertex2f(x, y);
-				//qDebug() << x;
-				//qDebug() << y;
-				index = ((int)x + (int)y * geometry->getDimX()) * 3;
-				if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
-				{
-					nextX = x + dat[index + 1];
-					nextY = y + dat[index];
-					x = nextX;
-					y = nextY;
-				}
+				if(rk)
+					rungeKutta(&x, &y, velocity);
+				else
+					euler(&x, &y, velocity);
 			}
 
 			glEnd();
 		}
 	}
 }
+void GLWidget::euler(float *x, float *y, float *tex)
+{
+	float nextX, nextY;
+	int index;
+
+	index = ((int)*x + (int)*y * geometry->getDimX()) * 3;
+	if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
+	{
+		nextX = *x + stepSize * tex[index + 1];
+		nextY = *y + stepSize * tex[index];
+		*x = nextX;
+		*y = nextY;
+	}
+}
+
+void GLWidget::rungeKutta(float *x, float *y, float *tex)
+{
+	float tmpX, nextX, tmpY, nextY;
+	int index;
+
+	index = ((int)*x + (int)*y * geometry->getDimX()) * 3;
+	if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
+	{
+		tmpX = *x + stepSize * tex[index + 1] / 2.0;
+		tmpY = *y + stepSize * tex[index] / 2.0;
+
+		index = ((int)tmpX + (int)tmpY * geometry->getDimX()) * 3;
+		if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
+		{
+			nextX = *x + stepSize * tex[index + 1];
+			nextY = *y + stepSize * tex[index];
+			*x = nextX;
+			*y = nextY;
+		}
+	}
+}
 
 void GLWidget::updatePong()
 {
-	ball.update();
+	float x, y;
+
+	int index = ((int)ball.x() + (int)ball.y() * geometry->getDimX()) * 3;
+	if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
+		ball.update(vec3(velocity[index + 1], velocity[index]));
+	else
+		ball.update();
 }
 
 void GLWidget::drawPong()
@@ -541,18 +623,18 @@ void GLWidget::loadDataSet(std::string fileName)
 	vel = dataset->createChannelVectorLength(0,1,2);
 
 	geometry = dataset->getGeometry();
+	isFlipped = geometry->getFlipped();
 
 	//check_gl_error("test");
 	glGenTextures(1, &gridTexture);
 	check_gl_error("generate grid texture");
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gridTexture);
 	check_gl_error("bind grid texture");
-/*
+
 	qDebug() << "Xmin: " << geometry->getMinX();
 	qDebug() << "Xmax: " << geometry->getMaxX();
 	qDebug() << "Ymin: " << geometry->getMinY();
-	qDebug() << "Ymax: " << geometry->getMaxY();*/
-	//qDebug() << "range: " << channel3Range;
+	qDebug() << "Ymax: " << geometry->getMaxY();
 
 	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, geometry->getDimX(), geometry->getDimY(), 0, GL_RGB, GL_FLOAT, geometry->geometryData);
 	check_gl_error("teximage2d grid texture");
@@ -593,7 +675,7 @@ void GLWidget::loadDataSet(std::string fileName)
 	FlowChannel* v2 = dataset->getChannel(1);
 	FlowChannel* v3 = dataset->getChannel(vel);
 
-	float* velocity = (float*) malloc(sizeof(float) * geometry->getDimX() * geometry->getDimY() * 3);
+	velocity = (float*) malloc(sizeof(float) * geometry->getDimX() * geometry->getDimY() * 3);
 	for (int i = 0; i < geometry->getDimX()*geometry->getDimY(); i++) {
 		velocity[i*3] = v1->getRawValue(i);
 		velocity[i*3+1] = v2->getRawValue(i);
@@ -606,18 +688,78 @@ void GLWidget::loadDataSet(std::string fileName)
 	check_gl_error("bind velocity texture");
 	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB32F_ARB, geometry->getDimX(), geometry->getDimY(), 0, GL_RGB, GL_FLOAT, velocity);
 
-	float* test = (float*) malloc(sizeof(float) * geometry->getDimX() * geometry->getDimY() * 3);
-	glGetTexImage(GL_TEXTURE_RECTANGLE_ARB, 0 , GL_RGB, GL_FLOAT, test);
+	float* inverseGridX = (float*) malloc(sizeof(float) * geometry->getDimX());
+	float* inverseGridY = (float*) malloc(sizeof(float) * geometry->getDimY());
 
-/*	//qDebug() << "testing[0]: " << test[0];
-	//qDebug() << "testing[0]: " << test[1];
-	//qDebug() << "testing[0]: " << test[2];
-	//qDebug() << "testing[313]: " << test[313*3];
-	//qDebug() << "testing[313]: " << test[313*3+1];
-	//qDebug() << "testing[313]: " << test[313*3+2];
-	//qDebug() << "testing[555]: " << test[555*3];
-	//qDebug() << "testing[555]: " << test[555*3+1];
-	//qDebug() << "testing[555]: " << test[555*3+2];*/
+	float prev, next;
+	float target = 0.0;
+	int j = 0;
+	int k = 0;
+
+	if (!isFlipped) {
+
+	
+		for (int i = 1; i < geometry->getDimX() - 1; i++) {
+			j = 0;
+			k = 0;
+
+			target = float(i)/float(geometry->getDimX());
+
+			while (target > geometry->geometryData[0+j][0]) {
+					j++;
+			}
+			float next = 0+j;
+			while (target < geometry->geometryData[j+k][0]) {
+					k--;
+			}
+			float prev = j+k;
+
+			inverseGridX[i] = prev + (target - geometry->geometryData[k+j][0]) * ((next-prev)/(geometry->geometryData[0+j][0] - geometry->geometryData[k+j][0]));
+			inverseGridX[i] /= geometry->getDimX();
+			//qDebug() << "index: " << prev;
+			//qDebug() << "value: " << inverseGridX[i];
+		}
+		for (int i = 1; i < geometry->getDimY() - 1; i++) {
+			j = 0;
+			k = 0;
+
+			target = float(i)/float(geometry->getDimY());
+
+			while (target > geometry->geometryData[0+j][1]) {
+					j += geometry->getDimX();
+			}
+			float next = (0+j) / geometry->getDimX();
+			while (target < geometry->geometryData[j+k][1]) {
+					k -= geometry->getDimX();
+			}
+			float prev = (j+k) / geometry->getDimX();
+
+			inverseGridY[i] = prev + (target - geometry->geometryData[k+j][1]) * ((next-prev)/(geometry->geometryData[0+j][1] - geometry->geometryData[k+j][1]));
+			inverseGridY[i] /= geometry->getDimY();
+			//qDebug() << "index: " << prev;
+			//qDebug() << "value: " << inverseGridY[i];
+		}
+	} else {
+		for (int i = 0; i < geometry->getDimX(); i++) {
+
+			inverseGridX[i] = float(i)/float(geometry->getDimX());
+		}
+		for (int i = 0; i < geometry->getDimY(); i++) {
+			inverseGridY[i] = float(i)/float(geometry->getDimY());
+		}
+	}
+
+	glGenTextures(1, &inverseGridXTexture);
+	check_gl_error("generate velocity texture");
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, inverseGridXTexture);
+	check_gl_error("bind velocity texture");
+	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_LUMINANCE, geometry->getDimX(), 1, 0, GL_LUMINANCE, GL_FLOAT, inverseGridX);
+
+	glGenTextures(1, &inverseGridYTexture);
+	check_gl_error("generate velocity texture");
+	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, inverseGridYTexture);
+	check_gl_error("bind velocity texture");
+	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_LUMINANCE, geometry->getDimY(), 1, 0, GL_LUMINANCE, GL_FLOAT, inverseGridY);
 
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
 }

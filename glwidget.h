@@ -72,7 +72,10 @@ public:
 public slots:
 	void toggleArrowPlot(bool enabled);
 	void toggleStreamlines(bool enabled);
+	void setRK(bool enabled);
 	void togglePong(bool enabled);
+	void resetPong();
+	void pausePong();
 
 protected:
 
@@ -122,15 +125,26 @@ private:
     QTimer *timer;
 
 	bool arrowPlot;
+
+	int numArrows;
 	
 	bool streamlines;
 
+	bool rk;
+
+	int numLines;
+	float stepSize;
+	int numSteps;
+
 	bool pong;
 
+	bool paused;
 	Ball ball;
 
 	//! The flow data.
 	FlowData *dataset;
+
+	float *velocity;
 
 	int chX;
 
@@ -174,9 +188,17 @@ private:
 	GLuint fbo_grid;
 	GLuint gridTexture;
 	GLuint depth_rb_grid;
+	GLuint inverseGridXTexture;
+	GLuint inverseGridYTexture;
+
+	bool isFlipped;
+	float texWidth;
+	float texHeight;
 
 	void drawArrows();
 	void drawStreamlines();
+	void euler(float *x, float *y, float *tex);
+	void rungeKutta(float *x, float *y, float *tex);
 	void updatePong();
 	void drawPong();
 

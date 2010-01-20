@@ -40,8 +40,29 @@ private:
 	//! The widget displaying the actual render of the volume data.
     GLWidget *glWidget;
 
+	//! The checkbox that enables/disables the arrow plot.
 	QCheckBox *checkArrowPlot;
+
+	//! The checkbox that enables/disables the streamlines.
 	QCheckBox *checkStreamlines;
+
+	//! The widget group for the buttons to switch between Euler and Runge-Kutta algorithms.
+	QGroupBox *rkGroup;
+
+	//! The button group for the buttons to switch between Euler and Runge-Kutta algorithms.
+    QButtonGroup *rkButtons;
+
+	//! The button that switches to Euler algorithm.
+    QRadioButton *eulerButton;
+
+	//! The button that switches to Runge-Kutta algorithm.
+	QRadioButton *rkButton;
+
+	//! The button to reset the pong game.
+	QPushButton *resetButton;
+
+	//! The button to pause the pong game.
+	QPushButton *pauseButton;
 
 	//! The Qt scene used to display the transfer function.
 	QGraphicsScene *transferScene;

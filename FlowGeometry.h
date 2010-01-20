@@ -31,19 +31,9 @@ class FlowGeometry{
 		///returns X index of the last vertex lying left to the position x and the Y index of the last vertex lying under the position y 
 		int getXYvtx(vec3 pos);
 
-		///returns the position of the vertex
-		vec3 getPos(int vtxID);
-		///returns the x position of the vertex
-		float getPosX(int vtxID);
-		///returns the y position of the vertex
-		float getPosY(int vtxID);    
-	    
 		///indicates whether the x and y axes have to be swaped
 		bool isFlipped;
 
-		//TODO for students: improve this
-		///a very slow and dumb routine, that finds the nearest vertex to the given position
-		int getNearestVtx(vec3 pos);
 		
 	public:
 		FlowGeometry();
@@ -97,6 +87,20 @@ class FlowGeometry{
 
 		///Storage for the geometry
 		vec3* geometryData;
+
+		bool getFlipped(void);
+		
+		//TODO for students: improve this
+		///a very slow and dumb routine, that finds the nearest vertex to the given position
+		int getNearestVtx(vec3 pos);
+
+		///returns the position of the vertex
+		vec3 getPos(int vtxID);
+		///returns the x position of the vertex
+		float getPosX(int vtxID);
+		///returns the y position of the vertex
+		float getPosY(int vtxID); 
+
 };
 
 #endif

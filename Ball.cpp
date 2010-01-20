@@ -1,12 +1,27 @@
 #include "Ball.h"
 #include "qgl.h"
 
-Ball::Ball(float x, float y, float velX, float velY)
+Ball::Ball(float x, float y, vec3 vel)
 {
 	_x = x;
 	_y = y;
-	_velX = velX;
-	_velY = velY;
+	_vel = vel;
+}
+
+float Ball::x()
+{
+	return _x;
+}
+
+float Ball::y()
+{
+	return _y;
+}
+
+void Ball::setPos(float x, float y)
+{
+	_x = x;
+	_y = y;
 }
 
 void Ball::draw()
@@ -26,8 +41,15 @@ void Ball::draw()
 
 void Ball::update()
 {
-	_x += _velX;
-	_y += _velY;
+	_x += _vel.v[0];
+	_y += _vel.v[1];
+}
+
+void Ball::update(vec3 vel)
+{
+	_vel = _vel/2 + vel/2;
+	_x += _vel.v[0];
+	_y += _vel.v[1];
 }
 
 Ball::~Ball(void)
