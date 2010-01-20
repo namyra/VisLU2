@@ -1,3 +1,9 @@
+/*! \file Ball.h
+	\brief Ball source file.
+
+	Contains the source code for the Ball class, a representation of the ball for the Pong game.
+*/
+
 #include "Ball.h"
 #include "qgl.h"
 
@@ -41,6 +47,11 @@ void Ball::setPos(float x, float y)
 	_pos[1] = y;
 }
 
+void Ball::setVel(vec3 vel)
+{
+	_vel = vel;
+}
+
 void Ball::draw()
 {
 	glMatrixMode(GL_MODELVIEW);
@@ -67,19 +78,17 @@ void Ball::update()
 
 void Ball::update(vec3 vel, vec3 playerPos, PongMode mode)
 {
+	_vel = _vel/2 + vel/2;
+
 	if(mode == PONG_ATTRACTION)
 	{
 		vec3 attraction = playerPos - _pos;
-		_vel = _vel/3 + vel/3 + !attraction/attraction.length() * 100;
+		_vel += !attraction/max(attraction.length(), 10) * 100;
 	}
 	else if(mode == PONG_REPULSION)
 	{
 		vec3 repulsion = _pos - playerPos;
-		_vel = _vel/3 + vel/3 + !repulsion/repulsion.length() * 100;
-	}
-	else if(mode == PONG_NEUTRAL)
-	{
-		_vel = _vel/2 + vel/2;
+		_vel += !repulsion/max(repulsion.length(), 10) * 100;
 	}
 
 	_pos = proposeMove();

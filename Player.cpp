@@ -1,3 +1,9 @@
+/*! \file Player.cpp
+	\brief Player source file.
+
+	Contains the source code for the Player class, a representation of the player of the Pong game.
+*/
+
 #include "Player.h"
 #include "qgl.h"
 

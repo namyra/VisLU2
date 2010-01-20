@@ -23,7 +23,7 @@ public:
 	//! Default constructor.
 	/*!
 		Creates a new MainWindow and sets up the GUI for it.
-		\sa createSlider(), ~MainWindow()
+		\sa ~MainWindow()
 	*/
     MainWindow();
 
@@ -46,9 +46,13 @@ private:
 	//! The checkbox that enables/disables the arrow plot.
 	QCheckBox *checkArrowPlot;
 
+	//! The label for the spinbox for the number of arrows in the arrow plot.
 	QLabel *labelNumArrows;
+
+	//! The spinbox for the number of arrows in the arrow plot.
 	QSpinBox *sbNumArrows;
 
+	//! The checkbox that enables/disables the scaling of arrows in the arrow plot.
 	QCheckBox *checkArrowScale;
 
 	//! The widget group for all streamline options.
@@ -66,13 +70,22 @@ private:
 	//! The button that switches to Runge-Kutta algorithm.
 	QRadioButton *rkButton;
 
+	//! The label for the spinbox for the number of streamlines.
 	QLabel *labelNumLines;
+
+	//! The spinbox for the number of streamlines.
 	QSpinBox *sbNumLines;
 
+	//! The label for the spinbox for the number of iteration steps for the streamlines.
 	QLabel *labelNumSteps;
+
+	//! The spinbox for the number of iteration steps for the streamlines.
 	QSpinBox *sbNumSteps;
 
+	//! The label for the spinbox for the size of each iteration step for the streamlines.
 	QLabel *labelStepSize;
+
+	//! The spinbox for the size of each iteration step for the streamlines.
 	QDoubleSpinBox *sbStepSize;
 
 	//! The widget group for all pong options.

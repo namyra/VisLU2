@@ -56,7 +56,7 @@ public:
     int createChannelVectorLength(int chX, int chY, int chZ = -1);
 	///creates a new channel containing the vector lengths for the given channels (channels given by reference). Returns address of the created channel
 	int createChannelVectorLength(FlowChannel* chX, FlowChannel* chY, FlowChannel* chZ = NULL);
-
+	///returns the underlying geometry
 	FlowGeometry* getGeometry();
 };
 #endif

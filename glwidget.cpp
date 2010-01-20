@@ -1,7 +1,7 @@
 /*! \file glwidget.cpp
 	\brief GLWidget source file.
 
-	Contains the source code for the GLWidget class, which is the main display widget, showing the slices/volume renders.
+	Contains the source code for the GLWidget class, which is the main display widget, showing the different flow visualisation options.
 */
 
 #include "glwidget.h"
@@ -24,13 +24,11 @@ GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
         timer->start(timerInterval);
     }
 
-	ball = Ball(290, 260);
-
-	numLines = 20;
 	stepSize = 0.25;
 	numSteps = 200;
-	pong = true;
-	paused = true;
+
+	ball = Ball(290, 260);
+	paused = false;
 
 	setCursor(QCursor(Qt::BlankCursor));
 	setMouseTracking(true);
@@ -131,6 +129,7 @@ void GLWidget::togglePong(bool enabled)
 void GLWidget::resetPong()
 {
 	ball.setPos(rand() % width(), rand() % height());
+	ball.setVel();
 }
 
 void GLWidget::pausePong()
@@ -543,16 +542,16 @@ void GLWidget::drawStreamlines()
 			{
 				glVertex2f(x, y);
 				if(rk)
-					rungeKutta(&x, &y, velocity);
+					rungeKutta(&x, &y);
 				else
-					euler(&x, &y, velocity);
+					euler(&x, &y);
 			}
 
 			glEnd();
 		}
 	}
 }
-void GLWidget::euler(float *x, float *y, float *tex)
+void GLWidget::euler(float *x, float *y)
 {
 	float nextX, nextY;
 	int index;
@@ -560,14 +559,14 @@ void GLWidget::euler(float *x, float *y, float *tex)
 	index = ((int)*x + (int)*y * geometry->getDimX()) * 3;
 	if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
 	{
-		nextX = *x + stepSize * tex[index + 1];
-		nextY = *y + stepSize * tex[index];
+		nextX = *x + stepSize * velocity[index + 1];
+		nextY = *y + stepSize * velocity[index];
 		*x = nextX;
 		*y = nextY;
 	}
 }
 
-void GLWidget::rungeKutta(float *x, float *y, float *tex)
+void GLWidget::rungeKutta(float *x, float *y)
 {
 	float tmpX, nextX, tmpY, nextY;
 	int index;
@@ -575,14 +574,14 @@ void GLWidget::rungeKutta(float *x, float *y, float *tex)
 	index = ((int)*x + (int)*y * geometry->getDimX()) * 3;
 	if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
 	{
-		tmpX = *x + stepSize * tex[index + 1] / 2.0;
-		tmpY = *y + stepSize * tex[index] / 2.0;
+		tmpX = *x + stepSize * velocity[index + 1] / 2.0;
+		tmpY = *y + stepSize * velocity[index] / 2.0;
 
 		index = ((int)tmpX + (int)tmpY * geometry->getDimX()) * 3;
 		if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
 		{
-			nextX = *x + stepSize * tex[index + 1];
-			nextY = *y + stepSize * tex[index];
+			nextX = *x + stepSize * velocity[index + 1];
+			nextY = *y + stepSize * velocity[index];
 			*x = nextX;
 			*y = nextY;
 		}
