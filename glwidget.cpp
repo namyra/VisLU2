@@ -556,10 +556,10 @@ void GLWidget::drawArrows()
 
 void GLWidget::drawStreamlines()
 {
-	glUseProgram(0);
+	float x, y, mag;
+	int index;
 
-	glColor3f(0, 0, 0);
-	float x, y;
+	glUseProgram(0);
 
 	for(int i = 1; i <= numLines; i++)
 	{
@@ -572,6 +572,11 @@ void GLWidget::drawStreamlines()
 
 			for(int k = 0; k <= numSteps; k++)
 			{
+				index = ((int)x + (int)y * geometry->getDimX()) * 3;
+				if(index >= 0 && index < geometry->getDimX() * geometry->getDimY() * 3 - 3)
+					mag = velocity[index + 2]/dataset->getChannel(vel)->getMax();
+
+				glColor3f(mag, 0, 0);
 				glVertex2f(x, y);
 				if(rk)
 					rungeKutta(&x, &y);
@@ -585,7 +590,7 @@ void GLWidget::drawStreamlines()
 }
 void GLWidget::euler(float *x, float *y)
 {
-	float nextX, nextY;
+	float nextX, nextY, nextMag;
 	int index;
 
 	index = ((int)*x + (int)*y * geometry->getDimX()) * 3;
