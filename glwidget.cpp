@@ -10,8 +10,9 @@
 #include <qapplication.h>
 #include <qtimer.h>
 #include <QMouseEvent>
-
 #include <QDebug>
+#include <QDoubleSpinBox>
+#include <QSpinBox>
 
 GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
 {
@@ -24,14 +25,9 @@ GLWidget::GLWidget(int timerInterval, QWidget *parent) : QGLWidget(parent)
         timer->start(timerInterval);
     }
 
-	stepSize = 0.25;
-	numSteps = 200;
-
+	pong = false;
 	ball = Ball(290, 260);
 	paused = false;
-
-	setCursor(QCursor(Qt::BlankCursor));
-	setMouseTracking(true);
 
 	tf = new TFTexture(this);
 
@@ -114,16 +110,52 @@ void GLWidget::setNumLines(int num)
 void GLWidget::setNumSteps(int num)
 {
 	numSteps = num;
+
+	if(lockedSteps)
+	{
+		stepSize = min(50.0/(float)num, 1.0);
+		QDoubleSpinBox* spinBox = qFindChild<QDoubleSpinBox *>(parent(), "stepSizeBox");
+		if(spinBox != 0)
+			spinBox->setValue(stepSize);
+		else
+			qDebug() << "Spin Box not found";
+	}
 }
 
-void GLWidget::setStepSize(float step)
+void GLWidget::setStepSize(double step)
 {
 	stepSize = step;
+
+	if(lockedSteps)
+	{
+		numSteps = 50/stepSize;
+		QSpinBox* spinBox = qFindChild<QSpinBox *>(parent(), "numStepBox");
+		if(spinBox != 0)
+			spinBox->setValue(numSteps);
+		else
+			qDebug() << "Spin Box not found";
+	}
+}
+
+void GLWidget::lockStepSize(bool enabled)
+{
+	lockedSteps = enabled;
 }
 
 void GLWidget::togglePong(bool enabled)
 {
 	pong = enabled;
+
+	if(pong)
+	{
+		setCursor(QCursor(Qt::BlankCursor));
+		setMouseTracking(true);
+	}
+	else
+	{
+		setCursor(QCursor(Qt::ArrowCursor));
+		setMouseTracking(false);
+	}
 }
 
 void GLWidget::resetPong()
@@ -538,7 +570,7 @@ void GLWidget::drawStreamlines()
 
 			glBegin(GL_LINE_STRIP);
 
-			for(int k = 0; k < numSteps; k++)
+			for(int k = 0; k <= numSteps; k++)
 			{
 				glVertex2f(x, y);
 				if(rk)

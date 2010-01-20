@@ -119,10 +119,17 @@ public slots:
 	/*!
 		\param step The new size of each iteration step for the streamlines.
 	*/
-	void setStepSize(float step);
+	void setStepSize(double step);
+
+	//! Slot that locks/unlocks the ratio of step size to number of steps.
+	/*!
+		\param enabled Whether to lock (true) or unlock (false) the step size to the number of iteration steps.
+	*/
+	void lockStepSize(bool enabled);
 
 	//! Slot that enables/disables the Pong game.
 	/*!
+		Also disables the cursor and enables mouse tracking when the game is enabled and vice versa.
 		\param enabled Whether to enable (true) or disable (false) the Pong game.
 	*/
 	void togglePong(bool enabled);
@@ -230,6 +237,9 @@ private:
 
 	//! The steps size of each iteration for the streamlines.
 	float stepSize;
+
+	//! The flag that determines whether the ratio of step size and number of steps is locked.
+	bool lockedSteps;
 
 	//! The flag that determines whether the Pong game is enabled.
 	bool pong;

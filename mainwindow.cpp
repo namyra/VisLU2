@@ -57,21 +57,26 @@ MainWindow::MainWindow()
     connect(sbNumLines, SIGNAL(valueChanged(int)), glWidget, SLOT(setNumLines(int)));
 	sbNumLines->setValue(20);
 
-	labelNumSteps = new QLabel("Number of Steps");
+	labelNumSteps = new QLabel("Number of Iteration Steps");
 	sbNumSteps = new QSpinBox();
-	sbNumSteps->setMinimum(50);
+	sbNumSteps->setObjectName("numStepBox");
+	sbNumSteps->setMinimum(1);
 	sbNumSteps->setMaximum(5000);
-	sbNumSteps->setSingleStep(10);
     connect(sbNumSteps, SIGNAL(valueChanged(int)), glWidget, SLOT(setNumSteps(int)));
 	sbNumSteps->setValue(200);
 
 	labelStepSize = new QLabel("Step Size");
 	sbStepSize = new QDoubleSpinBox();
+	sbStepSize->setObjectName("stepSizeBox");
 	sbStepSize->setMinimum(0.01);
 	sbStepSize->setMaximum(1);
-	sbNumSteps->setSingleStep(0.05);
-    connect(sbStepSize, SIGNAL(valueChanged(float)), glWidget, SLOT(setStepSize(float)));
+	sbStepSize->setSingleStep(0.01);
+    connect(sbStepSize, SIGNAL(valueChanged(double)), glWidget, SLOT(setStepSize(double)));
 	sbStepSize->setValue(0.25);
+
+	checkLockedSteps = new QCheckBox("Ratio Locked", widget);
+	connect(checkLockedSteps, SIGNAL(toggled(bool)), glWidget, SLOT(lockStepSize(bool)));
+	checkLockedSteps->setChecked(true);
 
 	linesGroup = new QGroupBox("Streamlines");
     QGridLayout *linesGroupLayout = new QGridLayout;
@@ -84,7 +89,12 @@ MainWindow::MainWindow()
     linesGroupLayout->addWidget(sbNumSteps, 4, 2);
     linesGroupLayout->addWidget(labelStepSize, 5, 1);
     linesGroupLayout->addWidget(sbStepSize, 5, 2);
+    linesGroupLayout->addWidget(checkLockedSteps, 6, 1);
     linesGroup->setLayout(linesGroupLayout);
+
+	checkPong = new QCheckBox("Enabled", widget);
+	connect(checkPong, SIGNAL(toggled(bool)), glWidget, SLOT(togglePong(bool)));
+	checkPong->setChecked(false);
 
 	pauseButton = new QPushButton("&Pause", widget);
 	connect(pauseButton, SIGNAL(clicked()), glWidget, SLOT(pausePong()));
@@ -94,6 +104,7 @@ MainWindow::MainWindow()
 
 	pongGroup = new QGroupBox("Game");
     QVBoxLayout *pongGroupLayout = new QVBoxLayout;
+	pongGroupLayout->addWidget(checkPong);
 	pongGroupLayout->addWidget(pauseButton);
 	pongGroupLayout->addWidget(resetButton);
 	pongGroup->setLayout(pongGroupLayout);

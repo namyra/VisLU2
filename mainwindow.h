@@ -88,13 +88,19 @@ private:
 	//! The spinbox for the size of each iteration step for the streamlines.
 	QDoubleSpinBox *sbStepSize;
 
+	//! The checkbox that locks/unlocks the ratio of step size to number of steps.
+	QCheckBox *checkLockedSteps;
+
 	//! The widget group for all pong options.
 	QGroupBox *pongGroup;
 
-	//! The button to reset the pong game.
+	//! The checkbox that enables/disables the Pong game.
+	QCheckBox *checkPong;
+
+	//! The button to reset the Pong game.
 	QPushButton *resetButton;
 
-	//! The button to pause the pong game.
+	//! The button to pause the Pong game.
 	QPushButton *pauseButton;
 
 	//! The widget group for all transfer function options.
