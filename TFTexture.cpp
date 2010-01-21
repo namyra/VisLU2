@@ -15,7 +15,7 @@ TFTexture::TFTexture(QWidget *parent)
 	nodes = std::map<int, TFNode>();
 
 	addNode(TFNode(0, 0.0, 0.0, 0.7, 0.0));
-	addNode(TFNode(256 * 8.0, 0.8, 0, 0, 1));
+	addNode(TFNode(2047, 0.8, 0, 0, 1));
 }
 
 TFTexture::~TFTexture(void)

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="VisLu2"
 	ProjectGUID="{DB3B3813-B79E-4D53-89B3-3247E84F2B85}"
 	RootNamespace="VisLu1"
@@ -191,6 +191,10 @@
 			</File>
 			<File
 				RelativePath=".\GLSL\color.vert"
+				>
+			</File>
+			<File
+				RelativePath=".\GLSL\velocity.frag"
 				>
 			</File>
 		</Filter>

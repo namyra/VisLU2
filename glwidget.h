@@ -314,6 +314,12 @@ private:
 	//! The OpenGL id for the arrow plot shader program with scaling.
 	GLuint arrowScaleProgram;
 
+	//! the OpenGL id for the velocity texture generation shader.
+	GLuint velocityShader;
+
+	//! the OpenGL id for the velocity texture generation shader program.
+	GLuint velocityProgram;
+
 	//! The OpenGL id for the arrow sprite texture.
 	GLuint sprite;
 
@@ -326,19 +332,31 @@ private:
 	//! The OpenGL id for the grid texture render buffer.
 	GLuint depth_rb_grid;
 
+	//! The inverse texture generated from the x-axis of the grid.
 	GLuint inverseGridXTexture;
+
+	//! The inverse texture generated from the y-axis of the grid.
 	GLuint inverseGridYTexture;
 
+	//! Flag to check whether the x and y axis need to be flipped.
 	bool isFlipped;
-	float texWidth;
-	float texHeight;
 
+	//! Flag to check whether the velocity texture needs to be recomputed.
 	bool initVelocity;
 
 	//! The OpenGL id for the velocity texture render buffer.
 	GLuint velocityTextureFBO;
+
+	//! The OpenGL id for the velocity texture frame buffer object.
 	GLuint fbo_velocity;
+
+	//! The OpenGL id for the velocity texture depth buffer object.
 	GLuint depth_rb_velocity;
+
+	//! Generates the velocity texture.
+	/*!
+		Sets up a frame buffer object and generates a texture used to properly align the velocity data according to the grid.
+	*/
 
 	void initializeVelocity(void);
 
